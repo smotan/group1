@@ -1,4 +1,4 @@
-print("Viikon luetuimmat")
+print("Viikon luetuin")
 
 from urllib import request
 from bs4 import BeautifulSoup
