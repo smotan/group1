@@ -8,5 +8,5 @@ html = request.urlopen(url).read().decode('utf8')
 
 parsed = BeautifulSoup(html, 'html.parser')
 luetuin_viikko = parsed.find('div', attrs={'class': 'content'})
-
-print(luetuin_viikko)
+luetuin = luetuin_viikko.text
+print(luetuin)
