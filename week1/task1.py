@@ -8,7 +8,8 @@ html = request.urlopen(url).read().decode('utf8')
 
 parsed = BeautifulSoup(html, 'html.parser')
 luetuimmat_viikko = parsed.find('ol', attrs={'class': 'is-most-read-articles-list tab-content', 'data-period':'week'})
-luetuin_viikko = luetuimmat_viikko.find("div", attrs={'class':'content'})
-luetuin = luetuin_viikko.text
+luetuin_viikko = luetuimmat_viikko.find('div', attrs={'class':'content'})
+
+luetuin = luetuin_viikko.find('p').text
 print(luetuin)
 
