@@ -1,16 +1,38 @@
  #Hakukone
 
-while True
-	haku = input("Kirjoita hakusi tähän: ")
-	print("Lopeta painamalla q & enter")
-	if haku = "q" or haku = "Q":
-		
-from sklearn.feature_extraction.text import CountVectorizer
+while True:
+	print("Exit: q and enter")
+	haku = input("Write your query here: ")
+	if quit == "q" or quit  == "Q":
+		break
+				
 
-cv = CountVectorizer(lowercase=True, binary=True)
-sparse_matrix = cv.fit_transform(texthere)
-td_matrix = sparse_matrix.todense().T
+try:
 
-t2i = cv.vocabulary_  # shorter notation: t2i = term-to-index
-print("Query: example")
-print(td_matrix[t2i["example"]])
+    text_file = open("enwiki.txt", "r")
+
+    list_of_articles = []
+
+    for line in text_file:
+
+        if "<article name=" in line:
+
+            text = ""
+
+            continue
+
+        elif "</article>" in line:
+
+            list_of_articles.append(text)
+
+        else:
+
+            line = line.strip()
+
+            text += " " + line
+
+except OSError:
+
+    print("File not found")
+
+print(list_of_articles[:2])
