@@ -1,19 +1,23 @@
 
 from sklearn.feature_extraction.text import CountVectorizer
 
-def rewrite_token(t):
+def rewrite_token(t, td_matrix, t2i):
+    d = {"and": "&", "AND": "&",
+     "or": "|", "OR": "|",
+     "not": "1 -", "NOT": "1 -",
+     "(": "(", ")": ")"}
     return d.get(t, 'td_matrix[t2i["{:s}"]]'.format(t)) # Can you figure out what happens here?
 
-def rewrite_query(query): # rewrite every token in the query
-    return " ".join(rewrite_token(t) for t in query.split())
+def rewrite_query(query, td_matrix, t2i): # rewrite every token in the query
+    return " ".join(rewrite_token(t, td_matrix, t2i) for t in query.split())
 
-def test_query(query):
-    print("Query: '" + query + "'")
-    print("Rewritten:", rewrite_query(query))
-    print("Matching:", eval(rewrite_query(query))) # Eval runs the string as a Python command
-    print()
+#def test_query(query):
+ #   print("Query: '" + query + "'")
+  #  print("Rewritten:", rewrite_query(query))
+   # print("Matching:", eval(rewrite_query(query))) # Eval runs the string as a Python command
+    #print()
         
-def read_from_file(filename):   
+def read_from_file():   
     try:
         text_file = open("enwiki.txt", "r")
         list_of_articles = []
@@ -26,14 +30,11 @@ def read_from_file(filename):
             else:
                 line = line.strip()
                 text += " " + line
+        return list_of_articles
     except OSError:
         print("File not found")
     
 def main():
-    d = {"and": "&", "AND": "&",
-     "or": "|", "OR": "|",
-     "not": "1 -", "NOT": "1 -",
-     "(": "(", ")": ")"}
 
     while True:
         print("Lopeta painamalla q & enter")
@@ -44,11 +45,12 @@ def main():
         if query == "q":
             break
         else:
- 	    cv = CountVectorizer(lowercase=True, binary=True)
-            sparse_matrix = cv.fit_transform(text_file)
-            dense_matrix = sparse_matrix.todense()
-            td_matrix = dense_matrix.T
-            hits_matrix = eval(rewrite_query(query))
+            list_of_articles = read_from_file()
+            cv = CountVectorizer(lowercase=True, binary=True)
+            sparse_matrix = cv.fit_transform(list_of_articles)
+            td_matrix = sparse_matrix.todense().T
+            t2i = cv.vocabulary_
+            hits_matrix = eval(rewrite_query(query, td_matrix, t2i))
             hits_list = list(hits_matrix.nonzero()[1])
             for doc_idx in hits_list:
                 print("Matching doc:", list_of_articles[doc_idx])
