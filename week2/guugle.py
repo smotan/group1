@@ -1,3 +1,4 @@
+
  #Hakukone
 
 while True:
