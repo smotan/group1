@@ -44,6 +44,10 @@ def main():
         if query == "q":
             break
         else:
+ 	    cv = CountVectorizer(lowercase=True, binary=True)
+            sparse_matrix = cv.fit_transform(text_file)
+            dense_matrix = sparse_matrix.todense()
+            td_matrix = dense_matrix.T
             hits_matrix = eval(rewrite_query(query))
             hits_list = list(hits_matrix.nonzero()[1])
             for doc_idx in hits_list:
