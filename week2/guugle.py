@@ -37,12 +37,13 @@ def read_from_file():
 def main():
 
     while True:
-        print("Lopeta painamalla q & enter")
+        print("Quit: q & enter")
         query = input("Query: ")
         query = query.lower()
 
 	
         if query == "q":
+	    print("Goodbye")	
             break
         else:
             list_of_articles = read_from_file()
@@ -50,11 +51,13 @@ def main():
             sparse_matrix = cv.fit_transform(list_of_articles)
             td_matrix = sparse_matrix.todense().T
             t2i = cv.vocabulary_
-            hits_matrix = eval(rewrite_query(query, td_matrix, t2i))
-            hits_list = list(hits_matrix.nonzero()[1])
-            for doc_idx in hits_list:
-                print("Matching doc:", list_of_articles[doc_idx])
-
+            try:
+		hits_matrix = eval(rewrite_query(query, td_matrix, t2i))
+            	hits_list = list(hits_matrix.nonzero()[1])
+            	for doc_idx in hits_list:
+                	print("Matching doc:", list_of_articles[doc_idx])
+	    except KeyError:
+		print("No results")	
 
         
 main()
