@@ -66,6 +66,8 @@ def main():
                         for article in list_of_articles[:2]:
                             print("Matching doc:", article)
                         print("Found", len(list_of_articles), "articles.")
+                    else:
+                        print("No results")
       
             except ValueError:
                 print("No results")	
