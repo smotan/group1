@@ -6,16 +6,12 @@ def rewrite_token(t, td_matrix, t2i):
      "or": "|", "OR": "|",
      "not": "1 -", "NOT": "1 -",
      "(": "(", ")": ")"}
+    if t not in t2i:
+        return "0"
     return d.get(t, 'td_matrix[t2i["{:s}"]]'.format(t)) 
 
 def rewrite_query(query, td_matrix, t2i): # rewrite every token in the query
     return " ".join(rewrite_token(t, td_matrix, t2i) for t in query.split())
-
-#def test_query(query):
- #   print("Query: '" + query + "'")
-  #  print("Rewritten:", rewrite_query(query))
-   # print("Matching:", eval(rewrite_query(query))) # Eval runs the string as a Python command
-    #print()
         
 def read_from_file():   
     try:
@@ -56,10 +52,18 @@ def main():
                 t2i = cv.vocabulary_
 
                 hits_matrix = eval(rewrite_query(query, td_matrix, t2i))
+                if not hits_matrix.nonzero():
+                    print("No results")
+                    continue
                 hits_list = list(hits_matrix.nonzero()[1])
-                for doc_idx in hits_list:
+                
+                if len(hits_list) >= 3:
+                    for doc_idx in hits_list[:2]:
+                        print("Matching doc:", list_of_articles[doc_idx])
+                    print("Found", len(hits_list), "articles.")
+                else: 
                     print("Matching doc:", list_of_articles[doc_idx])
-            except:
+            except ValueError:
                 print("No results")	
 
         
