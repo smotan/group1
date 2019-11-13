@@ -26,6 +26,7 @@ def main():
         query = query.lower()
 
         if query == "q":
+            print("Goodbye!")
             break
         list_of_articles = read_from_file()
         
