@@ -1,18 +1,6 @@
-
-from sklearn.feature_extraction.text import CountVectorizer
-
-def rewrite_token(t, td_matrix, t2i):
-    d = {"and": "&", "AND": "&",
-     "or": "|", "OR": "|",
-     "not": "1 -", "NOT": "1 -",
-     "(": "(", ")": ")"}
-    if t not in t2i:
-        return "0"
-    return d.get(t, 'td_matrix[t2i["{:s}"]]'.format(t)) 
-
-def rewrite_query(query, td_matrix, t2i): # rewrite every token in the query
-    return " ".join(rewrite_token(t, td_matrix, t2i) for t in query.split())
-        
+from sklearn.feature_extraction.text import TfidfVectorizer
+import numpy as np
+   
 def read_from_file():   
     try:
         text_file = open("enwiki.txt", "r")
@@ -37,40 +25,22 @@ def main():
         query = input("Query: ")
         query = query.lower()
 
-
         if query == "q":
-            print("Goodbye")	
             break
-        else:
-            try:
-                list_of_articles = read_from_file()
-                if not list_of_articles:
-                    break
-                cv = CountVectorizer(lowercase=True, binary=True)
-                sparse_matrix = cv.fit_transform(list_of_articles)
-                td_matrix = sparse_matrix.todense().T
-                t2i = cv.vocabulary_
-
-                hits_matrix = eval(rewrite_query(query, td_matrix, t2i))
-                
-                try:
-                    hits_list = list(hits_matrix.nonzero()[1])
-                    if len(hits_list) >= 3:
-                        for doc_idx in hits_list[:2]:
-                            print("Matching doc:", list_of_articles[doc_idx])
-                        print("Found", len(hits_list), "articles.")
-                    else: 
-                        print("Matching doc:", list_of_articles[doc_idx])
-                except AttributeError:
-                    if hits_matrix == 1:
-                        for article in list_of_articles[:2]:
-                            print("Matching doc:", article)
-                        print("Found", len(list_of_articles), "articles.")
-                    else:
-                        print("No results")
-      
-            except ValueError:
-                print("No results")	
-
+        list_of_articles = read_from_file()
+        
+        
+        tfv = TfidfVectorizer(lowercase=True, sublinear_tf=True, use_idf=True, norm="l2")
+        sparse_matrix = tfv.fit_transform(list_of_articles).T.tocsr()
+        query_vec = tfv.transform([query]).tocsc()        
+        hits = np.dot(query_vec, sparse_matrix)
+        ranked_scores_and_doc_ids = sorted(zip(np.array(hits[hits.nonzero()])[0], hits.nonzero()[1]), reverse=True)
+        articles = 0
+        for i, (score, doc_idx) in enumerate(ranked_scores_and_doc_ids):
+            article = list_of_articles[doc_idx]
+            doc = article[:100]
+            articles += 1
+            print("Doc #{:d} (score: {:.4f}): {:s}".format(i, score, doc))
+        print("Found", articles, "articles")
         
 main()
