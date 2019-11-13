@@ -6,7 +6,7 @@ def rewrite_token(t, td_matrix, t2i):
      "or": "|", "OR": "|",
      "not": "1 -", "NOT": "1 -",
      "(": "(", ")": ")"}
-    return d.get(t, 'td_matrix[t2i["{:s}"]]'.format(t)) # Can you figure out what happens here?
+    return d.get(t, 'td_matrix[t2i["{:s}"]]'.format(t)) 
 
 def rewrite_query(query, td_matrix, t2i): # rewrite every token in the query
     return " ".join(rewrite_token(t, td_matrix, t2i) for t in query.split())
@@ -41,23 +41,26 @@ def main():
         query = input("Query: ")
         query = query.lower()
 
-	
+
         if query == "q":
-	    print("Goodbye")	
+            print("Goodbye")	
             break
         else:
-            list_of_articles = read_from_file()
-            cv = CountVectorizer(lowercase=True, binary=True)
-            sparse_matrix = cv.fit_transform(list_of_articles)
-            td_matrix = sparse_matrix.todense().T
-            t2i = cv.vocabulary_
             try:
-		hits_matrix = eval(rewrite_query(query, td_matrix, t2i))
-            	hits_list = list(hits_matrix.nonzero()[1])
-            	for doc_idx in hits_list:
-                	print("Matching doc:", list_of_articles[doc_idx])
-	    except KeyError:
-		print("No results")	
+                list_of_articles = read_from_file()
+                if not list_of_articles:
+                    break
+                cv = CountVectorizer(lowercase=True, binary=True)
+                sparse_matrix = cv.fit_transform(list_of_articles)
+                td_matrix = sparse_matrix.todense().T
+                t2i = cv.vocabulary_
+
+                hits_matrix = eval(rewrite_query(query, td_matrix, t2i))
+                hits_list = list(hits_matrix.nonzero()[1])
+                for doc_idx in hits_list:
+                    print("Matching doc:", list_of_articles[doc_idx])
+            except:
+                print("No results")	
 
         
 main()
