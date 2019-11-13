@@ -52,17 +52,21 @@ def main():
                 t2i = cv.vocabulary_
 
                 hits_matrix = eval(rewrite_query(query, td_matrix, t2i))
-                if not hits_matrix.nonzero():
-                    print("No results")
-                    continue
-                hits_list = list(hits_matrix.nonzero()[1])
                 
-                if len(hits_list) >= 3:
-                    for doc_idx in hits_list[:2]:
+                try:
+                    hits_list = list(hits_matrix.nonzero()[1])
+                    if len(hits_list) >= 3:
+                        for doc_idx in hits_list[:2]:
+                            print("Matching doc:", list_of_articles[doc_idx])
+                        print("Found", len(hits_list), "articles.")
+                    else: 
                         print("Matching doc:", list_of_articles[doc_idx])
-                    print("Found", len(hits_list), "articles.")
-                else: 
-                    print("Matching doc:", list_of_articles[doc_idx])
+                except AttributeError:
+                    if hits_matrix == 1:
+                        for article in list_of_articles[:2]:
+                            print("Matching doc:", article)
+                        print("Found", len(list_of_articles), "articles.")
+      
             except ValueError:
                 print("No results")	
 
