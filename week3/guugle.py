@@ -38,9 +38,10 @@ def main():
         articles = 0
         for i, (score, doc_idx) in enumerate(ranked_scores_and_doc_ids):
             article = list_of_articles[doc_idx]
-            doc = article[:100]
-            articles += 1
-            print("Doc #{:d} (score: {:.4f}): {:s}".format(i, score, doc))
+            doc = article[article.find(query)-100:article.find(query)+100]
+            if score >= 0.02:
+                articles += 1
+                print("Score: {:.4f}: {:s}".format(score, doc))
         print("Found", articles, "articles")
         
 main()
