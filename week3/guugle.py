@@ -36,7 +36,7 @@ def main():
             break
         
 def no_parse(query, list_of_articles):
-	query = re.sub("\"", '', query)
+	query = re.sub("\"", ' ', query)
 	try:        
             tfv = TfidfVectorizer(lowercase=True, sublinear_tf=True, use_idf=True, norm="l2")
             sparse_matrix = tfv.fit_transform(list_of_articles).T.tocsr()
