@@ -29,14 +29,15 @@ def main():
         quotes = re.search("^\".+\"$", query)
         list_of_articles = read_from_file()	
 
-        if(quotes):
-            no_parse(query, list_of_articles)	    
-
-        elif query == "q":
+        if query == "q":
             print("Goodbye!")
             break
+        elif not quotes:
+            (query, stemmed_list_of_art) = parse(query, list_of_articles)	
+            search(query, stemmed_list_of_art)    
+
         else:
-            parse(query, list_of_articles)
+            search(query, list_of_articles)
 
 def parse(query, list_of_articles):
     porter = LancasterStemmer()
@@ -48,25 +49,12 @@ def parse(query, list_of_articles):
          l1 = results2[i]
          l2 = ' '.join([porter.stem(word) for word in l1])
          stem_list_of_articles.append(l2)        
-    try:        
-        tfv = TfidfVectorizer(lowercase=True, sublinear_tf=True, use_idf=True, norm="l2")
-        sparse_matrix = tfv.fit_transform(stem_list_of_articles).T.tocsr()
-        query_vec = tfv.transform([query]).tocsc()        
-        hits = np.dot(query_vec, sparse_matrix)
-        ranked_scores_and_doc_ids = sorted(zip(np.array(hits[hits.nonzero()])[0], hits.nonzero()[1]), reverse=True)
-        articles = 0
-        for i, (score, doc_idx) in enumerate(ranked_scores_and_doc_ids):
-            article = list_of_articles[doc_idx]
-            doc = article[article.find(query)-100:article.find(query)+100]
-            if score >= 0.02:
-                articles += 1
-                print("Score: {:.4f}: {:s}".format(score, doc))
-        print("Found", articles, "articles")
-    except IndexError:
-        print("No results")            
+    return (query, stem_list_of_articles)      
+           
 
-def no_parse(query, list_of_articles):
-        query = re.sub("\"", ' ', query)
+def search(query, list_of_articles):
+        query = query.replace(query, " " + query + " ")
+        query = query.replace('"', '')
         try:        
             tfv = TfidfVectorizer(lowercase=True, sublinear_tf=True, use_idf=True, norm="l2")
             sparse_matrix = tfv.fit_transform(list_of_articles).T.tocsr()
@@ -76,7 +64,16 @@ def no_parse(query, list_of_articles):
             articles = 0
             for i, (score, doc_idx) in enumerate(ranked_scores_and_doc_ids):
                 article = list_of_articles[doc_idx]
-                doc = article[article.find(query)-100:article.find(query)+100]
+                if len(query.split()) == 1:
+                    doc = article[article.find(query)-100:article.find(query)+100]
+                else:
+                    first_word = query.split()[0]
+                    second_word = query.split()[1]
+                    doc = article[article.find(first_word)-100:article.find(first_word)+100]
+                    if not doc:
+                        doc = article[article.find(second_word)-100:article.find(second_word)+100]
+                        if not doc:
+                            print("why is that")
                 if score >= 0.02:
                     articles += 1
                     print("Score: {:.4f}: {:s}".format(score, doc))
