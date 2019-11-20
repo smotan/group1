@@ -26,11 +26,11 @@ def main():
         print("Quit: q & enter")
         query = input("Query: ")
         query = query.lower()
-	quotes = re.search("^\".+\"$", query)
-	list_of_articles = read_from_file()	
+        quotes = re.search("^\".+\"$", query)
+        list_of_articles = read_from_file()	
 
-	if(quotes):
-	    no_parse(query, list_of_articles)	    
+        if(quotes):
+            no_parse(query, list_of_articles)	    
 
         elif query == "q":
             print("Goodbye!")
@@ -66,8 +66,8 @@ def parse(query, list_of_articles):
         print("No results")            
 
 def no_parse(query, list_of_articles):
-	query = re.sub("\"", ' ', query)
-	try:        
+        query = re.sub("\"", ' ', query)
+        try:        
             tfv = TfidfVectorizer(lowercase=True, sublinear_tf=True, use_idf=True, norm="l2")
             sparse_matrix = tfv.fit_transform(list_of_articles).T.tocsr()
             query_vec = tfv.transform([query]).tocsc()        
@@ -82,5 +82,6 @@ def no_parse(query, list_of_articles):
                     print("Score: {:.4f}: {:s}".format(score, doc))
             print("Found", articles, "articles")
         except IndexError:
-	    print("No results")
+            print("No results")
+
 main()
