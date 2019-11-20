@@ -58,11 +58,10 @@ def search(query, list_of_articles, list_version):
             article = list_of_articles[doc_idx]
             if query in article:
                 doc = article[article.find(query)-100:article.find(query)+100]
-                if score >= 0.02:
-                    articles += 1
-                    print("Article: " + re.sub(r'\n<article name="(.*)?">\n.*', r'\1', article[:100]))
-                    print("Score: {:.4f}: {:s}".format(score, doc))
-                    print()
+                articles += 1
+                print("Article: " + re.sub(r'\n<article name="(.*)?">\n.*', r'\1', article[:100]))
+                print("Score: {:.4f}: {:s}".format(score, doc))
+                print()
         print("Found", articles, "articles")
     except IndexError:
         print("No results")
