@@ -27,18 +27,17 @@ def main():
         query = input("Query: ")
         query = query.lower()
         quotes = re.search("^\".+\"$", query)
-        list_of_articles = read_from_file()
-        original_list = list_of_articles	
+        original_list = read_from_file()	
 
         if query == "q":
             print("Goodbye!")
             break
         elif not quotes:
-            (query, stemmed_list_of_art) = parse(query, list_of_articles)	
-            search(query, original_list, stemmed_list_of_art)    
+            (query, stem_list_of_articles) = parse(query, original_list)	
+            search(query, original_list, stem_list_of_articles)    
 
         else:
-            search(query, original_list, list_of_articles)
+            literal_search(query, original_list)
 
 def parse(query, list_of_articles):
     porter = LancasterStemmer()
@@ -49,13 +48,20 @@ def parse(query, list_of_articles):
     for i in range(0, len(results2)):
          l1 = results2[i]
          l2 = ' '.join([porter.stem(word) for word in l1])
-         stem_list_of_articles.append(l2)        
-    return (query, stem_list_of_articles)      
+         stem_list_of_articles.append(l2)
+    return (query, stem_list_of_articles)
+
+def literal_search(query, list_of_articles):
+    query = query.replace('"', '')
+    articles = 0
+    for article in list_of_articles:
+        if query in article:
+            articles += 1
+            print("Article " + str(articles) + ":")
+            print(article[article.find(query)-100:article.find(query)+100])  
            
 
 def search(query, list_of_articles, list_version):
-        query = query.replace(query, " " + query + " ")
-        query = query.replace('"', '')
         try:        
             tfv = TfidfVectorizer(lowercase=True, sublinear_tf=True, use_idf=True, norm="l2")
             sparse_matrix = tfv.fit_transform(list_version).T.tocsr()
