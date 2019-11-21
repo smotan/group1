@@ -1,7 +1,15 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>Flask search engine</title>
+        <title>Search engine</title>
+        <style>
+            div {
+            width: 800px;
+            padding: 10px;
+            border: 5px solid gray;
+            margin: 10px;
+            }
+        </style>
     </head>
     <body>
         <h1>Find text</h1>
@@ -11,10 +19,11 @@
             <input type="submit" value="Search">
         </form>        
             {% for item in matches %}
-                <!--Display the name of the item based on the "name" key-->
-                <h3>{{ item["name"] }}</h3>
+            <div>    <!--Display the name of the item based on the "name" key-->
+                <h3 style="color:green">{{ item["name"] }}</h3>
                 <p>{{item["sisalto"]}}</p>
             <!--End for loop-->
+            </div>
             {% endfor %}
     </body>
 </html>

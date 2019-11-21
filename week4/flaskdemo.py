@@ -6,8 +6,7 @@ from nltk.stem import LancasterStemmer
 
 #Initialize Flask instance
 app = Flask(__name__)
-
-example_data = [{'name':'anna'}]
+example_data = []
 
 try:
     text_file = open("enwiki.txt", "r")
@@ -33,6 +32,7 @@ def parse(query, list_of_articles):
 def search_query(query, list_of_articles, list_version):
     query = re.sub(r'^"', '', query)
     query = re.sub(r'"$', '', query)
+    
     list_of_art = []
     try:        
         tfv = TfidfVectorizer(lowercase=True, sublinear_tf=True, use_idf=True, norm="l2")
@@ -44,6 +44,8 @@ def search_query(query, list_of_articles, list_version):
         for i, (score, doc_idx) in enumerate(ranked_scores_and_doc_ids):
             article = list_of_articles[doc_idx]
             doc = article[article.find(query)-100:article.find(query)+100]
+            if not doc:
+                doc = article[article.find(query):article.find(query)+200]
             articles += 1
             article_name = re.sub(r'\n?<article name="(.*)?">\n.*', r'\1', article[:100])
             list_of_art.append({'name':article_name, 'sisalto':doc})
@@ -67,7 +69,6 @@ def search():
         if not re.search("^\".+\"$", query):
             (query, list_version) = parse(query, list_of_articles)
         else:            
-            matches.append({"name":"hello"})
             list_version = list_of_articles
         matches = search_query(query, list_of_articles, list_version)
 
