@@ -3,16 +3,37 @@
         <meta charset="utf-8">
         <title>Search engine</title>
         <style>
-            div {
+        input[type=text]{
+            border: 2px solid black;
+            border-radius:4pc;
+            padding: 5px 10px;
+        }
+        input[type=submit]{
+            background-color: #B0E0E6;
+            color: black;
+            padding: 5px 10px;
+            text-decoration: none;
+            margin: 4px 2px;
+            cursor: pointer;
+            box-sixing: border-box;
+            border: 2px solid black;
+            border-radius: 4px;
+        }
+        div {
             width: 800px;
             padding: 10px;
-            border: 5px solid black;
+            border: 2px solid black;
             margin: 10px;
+            border-radius: 4px
+            }
+        p.serif {
+            font-family: "Times New Roman", Times, serif;
             }
         </style>
     </head>
     <body>
-        <h1 style="font-size:60px;">Find text</h1>
+
+        <h1 class="serif" style="font-size:60px; ">Find text<img src="/static/magnifying-glass.png" style="width: 156px; height: 160"  alt="Magnifying glass"></h1>
         <!--Reload the page with variable "query" in the URL-->
         <form>
             <input type="text" name="query" autofocus>
@@ -20,13 +41,11 @@
         </form>        
             {% for item in matches %}
             <div>    <!--Display the name of the item based on the "name" key-->
-                <h3 style="color:blue">{{ item["name"] }}</h3>
-                <p>{{item["sisalto"]}}</p>
+                <h3 class="serif" style="color:mediumblue">{{ item["name"] }}</h3>
+                <p class="serif">{{item["sisalto"]}}</p>
             <!--End for loop-->
             </div>
             {% endfor %}
-        <img src="/static/IMG_0897.jpg" width="1200" height="150">
-
     </body>
 </html>
                                
