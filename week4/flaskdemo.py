@@ -30,8 +30,8 @@ def parse(query, list_of_articles):
     return (query, stem_list_of_articles)    
           
 def search_query(query, list_of_articles, list_version):
-    query = re.sub(r'^"', '', query)
-    query = re.sub(r'"$', '', query)
+    query = re.sub(r'^"', ' ', query)
+    query = re.sub(r'"$', ' ', query)
     
     list_of_art = []
     try:        
