@@ -24,16 +24,21 @@
             padding: 10px;
             border: 2px solid black;
             margin: 10px;
-            border-radius: 4px
+            border-radius: 4px;
+            background-color:  #B0E0E6;
             }
-        p.serif {
-            font-family: "Times New Roman", Times, serif;
+        p.arial {
+            font-family: Arial, Helvetica ,sans-serif;
             }
+        a {color: black;
+           font-family: Arial ;
+           text-decoration: none;
+        }
         </style>
     </head>
     <body>
 
-        <h1 class="serif" style="font-size:60px; ">Find text<img src="/static/magnifying-glass.png" style="width: 156px; height: 160"  alt="Magnifying glass"></h1>
+        <h1 class="arial" style="font-size:60px; ">Find text<img src="/static/magnifying-glass.png" style="width: 156px; height: 160"  alt="Magnifying glass"></h1>
         <!--Reload the page with variable "query" in the URL-->
         <form>
             <input type="text" name="query" autofocus>
@@ -41,9 +46,9 @@
         </form>        
             {% for item in matches %}
             <div>    <!--Display the name of the item based on the "name" key-->
-                <h3 style="color:mediumblue">{{ item["name"] }}</h3>
-                <p>{{item["sisalto"]}}</p>
-                <a href="https://en.wikipedia.org/wiki/{{item["name"]}}" target="_blank">Link</a>
+                <h3 class="arial" style="color:black">{{ item["name"] }}</h3>
+                <p class="arial">{{item["sisalto"]}}</p>
+                <a href="https://en.wikipedia.org/wiki/{{item["name"]}}" target="_blank">Go to Wikipedia</a>
             <!--End for loop-->
             </div>
             {% endfor %}
