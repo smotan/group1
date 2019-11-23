@@ -41,8 +41,9 @@
         </form>        
             {% for item in matches %}
             <div>    <!--Display the name of the item based on the "name" key-->
-                <h3 class="serif" style="color:mediumblue">{{ item["name"] }}</h3>
-                <p class="serif">{{item["sisalto"]}}</p>
+                <h3 style="color:mediumblue">{{ item["name"] }}</h3>
+                <p>{{item["sisalto"]}}</p>
+                <a href="https://en.wikipedia.org/wiki/{{item["name"]}}" target="_blank">Link</a>
             <!--End for loop-->
             </div>
             {% endfor %}
