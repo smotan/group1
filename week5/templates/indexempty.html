@@ -1,0 +1,32 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Flask example</title>
+        <style>
+        input[type=text]{
+            border: 2px solid black;
+            border-radius:4pc;
+            padding: 5px 10px;
+        }
+        input[type=submit]{
+            background-color: #B0E0E6;
+            color: black;
+            padding: 5px 10px;
+            text-decoration: none;
+            margin: 4px 2px;
+            cursor: pointer;
+            box-sixing: border-box;
+            border: 2px solid black;
+            border-radius: 4px;
+        }
+        </style>
+    </head>
+    <body>
+        <h1 class="arial" style="font-size:60px; ">Find text<img src="/static/magnifying-glass.png" style="width: 156px; height: 160"  alt="Magnifying glass"></h1>
+        <!--Reload the page with variable "query" in the URL-->
+        <form>
+            <input type="text" name="query" autofocus>
+            <input type="submit" value="Search">
+        </form>
+    </body>
+</html>
