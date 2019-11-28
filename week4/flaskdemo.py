@@ -30,8 +30,8 @@ def parse(query, list_of_articles):
     return (query, stem_list_of_articles)    
           
 def search_query(query, list_of_articles, list_version):
-    query = re.sub(r'^"', ' ', query)
-    query = re.sub(r'"$', ' ', query)
+    query = re.sub(r'^"', '', query)
+    query = re.sub(r'"$', '', query)
     
     list_of_art = []
     try:        
@@ -43,6 +43,7 @@ def search_query(query, list_of_articles, list_version):
         articles = 0
         for i, (score, doc_idx) in enumerate(ranked_scores_and_doc_ids):
             article = list_of_articles[doc_idx]
+            query = ' ' + query
             doc = article[article.find(query)-100:article.find(query)+100]
             if not doc:
                 doc = article[article.find(query):article.find(query)+200]
