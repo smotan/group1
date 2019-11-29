@@ -94,3 +94,6 @@ def search():
     else:
         return render_template('indexempty.html', matches=[])
 
+@app.route('/hello')
+def hello():
+    return 'Hello, World!'
