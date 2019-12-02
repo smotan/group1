@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+from sklearn.feature_extraction.text import TfidfVectorizer
 from bs4 import BeautifulSoup 
 import matplotlib.pyplot as plt
 import matplotlib as mlp
@@ -8,9 +9,9 @@ import os
 import numpy as np
 import re
 from nltk.stem import LancasterStemmer
+import spacy
+from spacy import displacy
 from pathlib import Path
-import pke
-import time
 
 
 mlp.use('Agg')
@@ -39,53 +40,30 @@ def extract_pieces(query,content):
 @app.route('/search')
 def search():
     #Delete previous plots, to avoid having too many of them
-    os.system('rm -f static/*_plt.png')
+    os.system('rm -f templates/*_plt.html')
     #Get query from URL variable
     query = request.args.get('query')
+
     #Initialize list of matches
-    keys = []
     matches = []
-    plots = 0
     #If query not empty
     if query:
         #Look at each entry in the example data
         for art_name,content in list_of_articles.items():
             #If an entry name contains the query, add the entry to matches
             if query.lower() in content.lower():
-                while plots <= 5:
-                    extracted_content = extract_pieces(query.lower(),content)
-                    matches.append({'name':art_name, 'palat':extracted_content, 'pltpath':art_name+'_plt.png' })
-                    generate_individual_plots(query.lower(),art_name,content,extracted_content)
-                    plots += 1
-                    if plots < 5:
-                        break
+                extracted_content = extract_pieces(query.lower(),content)
+                sisalto =''.join(content)
+                nlp = spacy.load('en_core_web_sm')
+                doc = nlp(sisalto)
+                html = displacy.render(doc, style='ent', page=True)
+                file_name = art_name + "_plt.html"
+                output_path = Path("templates/" + file_name)
+                output_path.open("w", encoding="utf-8").write(html)
+                matches.append({'name':art_name, 'pltpath':output_path,'palat':extracted_content })
         #Render index.html with matches variable
-        #The program sleeps for 10 seconds to give it some time to load the pictures, don't know if this helps at all
-        time.sleep(10)
-        return render_template('index.html', matches=matches[:5])
+        return render_template('index.html', matches=matches)
     else:
         return render_template('indexempty.html', matches=[])
-
-
-def generate_individual_plots(query, art_name, content, pieces):
-    # YOUR code here:
-    sisalto = ''.join(content)
-    try:
-        extractor = pke.unsupervised.TopicRank()
-        extractor.load_document(input=sisalto[0:700], language='en')
-        extractor.candidate_selection()
-        extractor.candidate_weighting()
-        keyphrases = extractor.get_n_best(n=3)
-        names = []
-        values = []
-        for keyphrase in keyphrases:
-            names.append(keyphrase[0])
-            values.append(str(keyphrase[1]))
-        plt.figure()
-        plt.bar(names, values)
-        plt.title('Themes in the article')
-    except ValueError: #Pass if there are no themes in the text
-        pass  
-    plt.savefig('static/'+art_name+'_plt.png')
-
+ 
 
