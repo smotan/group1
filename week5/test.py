@@ -11,6 +11,7 @@ from nltk.stem import LancasterStemmer
 from pathlib import Path
 import pke
 import time
+from decimal import Decimal
 
 
 mlp.use('Agg')
@@ -25,6 +26,7 @@ except OSError:
     print("File not found")
 
 app = Flask(__name__)
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 def extract_pieces(query,content):
     start_indexes = [m.start() for m in re.finditer(query,content.lower())]
@@ -60,8 +62,6 @@ def search():
                     if plots < 5:
                         break
         #Render index.html with matches variable
-        #The program sleeps for 10 seconds to give it some time to load the pictures, don't know if this helps at all
-        time.sleep(10)
         return render_template('index.html', matches=matches[:5])
     else:
         return render_template('indexempty.html', matches=[])
@@ -72,7 +72,7 @@ def generate_individual_plots(query, art_name, content, pieces):
     sisalto = ''.join(content)
     try:
         extractor = pke.unsupervised.TopicRank()
-        extractor.load_document(input=sisalto[0:700], language='en')
+        extractor.load_document(input=sisalto[0:1000], language='en')
         extractor.candidate_selection()
         extractor.candidate_weighting()
         keyphrases = extractor.get_n_best(n=3)
@@ -82,10 +82,10 @@ def generate_individual_plots(query, art_name, content, pieces):
             names.append(keyphrase[0])
             values.append(str(keyphrase[1]))
         plt.figure()
+        values = list(map(float, values))
         plt.bar(names, values)
         plt.title('Themes in the article')
     except ValueError: #Pass if there are no themes in the text
         pass  
     plt.savefig('static/'+art_name+'_plt.png')
-
 
