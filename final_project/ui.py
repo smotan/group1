@@ -13,22 +13,25 @@ try:
     text_file = open("songs.txt", "r")
     file_text = text_file.read()
     list_of_songs = file_text.split("Title")
+    theme_file = open("themes.txt", "r")
+    read_themes = theme_file.read()
+    list_of_themes = read_themes.split(", ")
 except OSError:
     print("File not found")
 
 def parse(query, list_of_songs):
     porter = LancasterStemmer()
     query = porter.stem(query)
-    stem_list_of_articles = []
-    results2 = [line.split() for line in list_of_articles]
+    stem_list_of_songs = []
+    results2 = [line.split() for line in list_of_songs]
     results2 = [ x for x in results2 if x != []]
     for i in range(0, len(results2)):
         l1 = results2[i]
         l2 = ' '.join([porter.stem(word) for word in l1])
-        stem_list_of_articles.append(l2)    
-    return (query, stem_list_of_articles)    
+        stem_list_of_songs.append(l2)    
+    return (query, stem_list_of_songs)
           
-def search_query(query, list_of_articles, list_version):
+def search_query(query, list_of_songs, list_version):
     query = re.sub(r'^"', '', query)
     query = re.sub(r'"$', '', query)
     
@@ -41,7 +44,7 @@ def search_query(query, list_of_articles, list_version):
         ranked_scores_and_doc_ids = sorted(zip(np.array(hits[hits.nonzero()])[0], hits.nonzero()[1]), reverse=True)
         articles = 0
         for i, (score, doc_idx) in enumerate(ranked_scores_and_doc_ids):
-            article = list_of_articles[doc_idx]
+            article = list_of_songs[doc_idx]
             query = ' ' + query
             doc = article[article.find(query)-100:article.find(query)+100]
             if not doc:
@@ -67,10 +70,10 @@ def search():
     #If query exists (i.e. is not None)
     if query:
         if not re.search("^\".+\"$", query):
-            (query, list_version) = parse(query, list_of_articles)
+            (query, list_version) = parse(query, list_of_songs)
         else:            
-            list_version = list_of_articles
-        matches = search_query(query, list_of_articles, list_version)
+            list_version = list_of_songs
+        matches = search_query(query, list_of_songs, list_version)
 
 
     #Render index.html with matches variable
