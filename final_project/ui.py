@@ -31,7 +31,7 @@ def parse(query, list_of_songs):
         stem_list_of_songs.append(l2)    
     return (query, stem_list_of_songs)
           
-def search_query(query, list_of_songs, list_version):
+def search_query(query, list_of_themes, list_of_songs, list_version):
     query = re.sub(r'^"', '', query)
     query = re.sub(r'"$', '', query)
     
@@ -44,13 +44,12 @@ def search_query(query, list_of_songs, list_version):
         ranked_scores_and_doc_ids = sorted(zip(np.array(hits[hits.nonzero()])[0], hits.nonzero()[1]), reverse=True)
         articles = 0
         for i, (score, doc_idx) in enumerate(ranked_scores_and_doc_ids):
-            article = list_of_songs[doc_idx]
+            article = list_of_themes[doc_idx]
             query = ' ' + query
-            doc = article[article.find(query)-100:article.find(query)+100]
+            doc = list_of_songs[doc_idx]
             if not doc:
                 doc = article[article.find(query):article.find(query)+200]
             articles += 1
-            article_name = re.sub(r'\n?<article name="(.*)?">\n.*', r'\1', article[:100])
             list_of_art.append({'name':article_name, 'sisalto':doc})
     except IndexError:
         print("No results")

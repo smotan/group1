@@ -46,9 +46,7 @@
         </form>        
             {% for item in matches %}
             <div>    <!--Display the name of the item based on the "name" key-->
-                <h3 class="arial" style="color:black">{{ item["name"] }}</h3>
                 <p class="arial">{{item["sisalto"]}}</p>
-                <a href="https://en.wikipedia.org/wiki/{{item["name"]}}" target="_blank">Go to Wikipedia</a>
             <!--End for loop-->
             </div>
             {% endfor %}
