@@ -19,10 +19,9 @@ def main():
             extractor.load_document(input=song, language='en')
             extractor.candidate_selection()
             extractor.candidate_weighting()
-            keyphrases = extractor.get_n_best(n=1)
-            for keyphrase in keyphrases:
-                themes.append(keyphrase[0])
-        with open("themes.txt", "w") as output:
+            keyphrases = extractor.get_n_best(n=10)
+            themes.append(keyphrases)
+        with open("themes1.txt", "w") as output:
             output.write(str(themes))
     except ValueError:
         print("No")

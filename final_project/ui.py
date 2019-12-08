@@ -4,6 +4,7 @@ import numpy as np
 import re
 from nltk.stem import LancasterStemmer
 import pke
+from string import digits 
 
 #Initialize Flask instance
 app = Flask(__name__)
@@ -12,14 +13,24 @@ songs = []
 try:
     text_file = open("songs.txt", "r")
     file_text = text_file.read()
-    list_of_songs = file_text.split("Title")
-    theme_file = open("themes.txt", "r")
+    list_of_songs = file_text.split("Title: ")
+    theme_file = open("themes1.txt", "r")
     read_themes = theme_file.read()
-    list_of_themes = read_themes.split(", ")
+    remove_digits = str.maketrans('', '', digits)
+    res = read_themes.translate(remove_digits)
+    res = re.sub("\[", "", res)
+    res = re.sub("\(\'", "", res)
+    res = re.sub("\'\,", ",", res)
+    res = re.sub("\.\)", "", res)
+    res = re.sub(" ,", "", res)
+    list_of_themes = res.split("], ")
+    songs_and_themes = dict(zip(list_of_themes, list_of_songs))
+    list_of_songs = list(songs_and_themes.values())
+    list_of_themes = list(songs_and_themes.keys())
 except OSError:
     print("File not found")
 
-def parse(query, list_of_songs):
+def parse(query, list_of_themes):
     porter = LancasterStemmer()
     query = porter.stem(query)
     stem_list_of_songs = []
@@ -31,7 +42,7 @@ def parse(query, list_of_songs):
         stem_list_of_songs.append(l2)    
     return (query, stem_list_of_songs)
           
-def search_query(query, list_of_themes, list_of_songs, list_version):
+def search_query(query, list_of_songs, list_version, list_of_themes):
     query = re.sub(r'^"', '', query)
     query = re.sub(r'"$', '', query)
     
@@ -45,12 +56,11 @@ def search_query(query, list_of_themes, list_of_songs, list_version):
         articles = 0
         for i, (score, doc_idx) in enumerate(ranked_scores_and_doc_ids):
             article = list_of_themes[doc_idx]
+            index = list_of_themes.index(article)
             query = ' ' + query
-            doc = list_of_songs[doc_idx]
-            if not doc:
-                doc = article[article.find(query):article.find(query)+200]
+            doc = list_of_songs[index]
             articles += 1
-            list_of_art.append({'name':article_name, 'sisalto':doc})
+            list_of_art.append({'sisalto':doc})
     except IndexError:
         print("No results")
     return list_of_art
@@ -71,8 +81,8 @@ def search():
         if not re.search("^\".+\"$", query):
             (query, list_version) = parse(query, list_of_songs)
         else:            
-            list_version = list_of_songs
-        matches = search_query(query, list_of_songs, list_version)
+            list_version = list_of_themes
+        matches = search_query(query, list_of_songs, list_version, list_of_themes)
 
 
     #Render index.html with matches variable
