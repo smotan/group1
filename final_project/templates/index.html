@@ -46,6 +46,8 @@
         </form>        
             {% for item in matches %}
             <div>    <!--Display the name of the item based on the "name" key-->
+                <h3 class="arial" style="color:black">{{ item["author"] }}</h3>
+                <h4 class="arial" style="color:black">{{ item["title"] }}</h4>
                 <p class="arial">{{item["sisalto"]}}</p>
             <!--End for loop-->
             </div>

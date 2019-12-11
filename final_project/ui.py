@@ -11,9 +11,9 @@ app = Flask(__name__)
 songs = []
 
 try:
-    text_file = open("songs.txt", "r")
+    text_file = open("songs_with_authors.txt", "r")
     file_text = text_file.read()
-    list_of_songs = file_text.split("Title: ")
+    list_of_songs = file_text.split("Author: ")
     theme_file = open("themes1.txt", "r")
     read_themes = theme_file.read()
     remove_digits = str.maketrans('', '', digits)
@@ -46,25 +46,39 @@ def search_query(query, list_of_songs, list_version, list_of_themes):
     query = re.sub(r'^"', '', query)
     query = re.sub(r'"$', '', query)
     
-    list_of_art = []
-    try:        
-        tfv = TfidfVectorizer(lowercase=True, sublinear_tf=True, use_idf=True, norm="l2")
-        sparse_matrix = tfv.fit_transform(list_version).T.tocsr()
-        query_vec = tfv.transform([query]).tocsc()        
-        hits = np.dot(query_vec, sparse_matrix)
-        ranked_scores_and_doc_ids = sorted(zip(np.array(hits[hits.nonzero()])[0], hits.nonzero()[1]), reverse=True)
-        articles = 0
-        for i, (score, doc_idx) in enumerate(ranked_scores_and_doc_ids):
-            article = list_of_themes[doc_idx]
-            index = list_of_themes.index(article)
-            query = ' ' + query
-            doc = list_of_songs[index]
-            articles += 1
-            list_of_art.append({'sisalto':doc})
-    except IndexError:
-        print("No results")
-    return list_of_art
+    extractor = pke.unsupervised.TopicRank()
+    extractor.load_document(input=query, language='en')
+    extractor.candidate_selection()
+    extractor.candidate_weighting()
+    keyphrases = extractor.get_n_best(n=10)
+    list_of_matches = []
 
+    for query in keyphrases:
+        try:        
+            tfv = TfidfVectorizer(lowercase=True, sublinear_tf=True, use_idf=True, norm="l2")
+            sparse_matrix = tfv.fit_transform(list_version).T.tocsr()
+            query_vec = tfv.transform([query[0]]).tocsc()        
+            hits = np.dot(query_vec, sparse_matrix)
+            #Index error if no hits
+            ranked_scores_and_doc_ids = sorted(zip(np.array(hits[hits.nonzero()])[0], hits.nonzero()[1]), reverse=True)
+
+            for i, (score, doc_idx) in enumerate(ranked_scores_and_doc_ids):
+                article = list_of_themes[doc_idx]
+                doc = list_of_songs[doc_idx]
+                list_of_matches.append(doc)
+                #list_of_matches.append({'sisalto':doc})
+        except IndexError:
+            continue
+    return list_of_matches
+
+def sort_matches(list_of_matches):
+    sorted_list = []
+    final_list = []
+    sorted_list = sorted(list_of_matches, key = list_of_matches.count, reverse = True)
+    for song in sorted_list:
+        if song not in final_list:
+            final_list.append(song)
+    return final_list
 
 #Function search() is associated with the address base URL + "/search"
 @app.route('/search')
@@ -75,6 +89,7 @@ def search():
 
     #Initialize list of matches
     matches = []
+    list_of_matches = []
 
     #If query exists (i.e. is not None)
     if query:
@@ -82,7 +97,12 @@ def search():
             (query, list_version) = parse(query, list_of_songs)
         else:            
             list_version = list_of_themes
-        matches = search_query(query, list_of_songs, list_version, list_of_themes)
+        list_of_matches = search_query(query, list_of_songs, list_version, list_of_themes)
+        for doc in sort_matches(list_of_matches):
+            title = re.sub(r'.*Title: (.*)(?= Lyrics).*', r'\1', doc[:100])
+            author = re.sub(r'(.*)(?= Title).*', r'\1', doc[:100])
+            text = re.sub(r'.*(?<=Lyrics: )(.*)', r'\1', doc)
+            matches.append({'author':author, 'title':title,'sisalto':text})
 
 
     #Render index.html with matches variable

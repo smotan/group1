@@ -15,14 +15,16 @@ def main():
         cells = row.find_all('td')
         if len(cells) == 3:
             song = cells[1].text.lower()
+            author = cells[0].text.lower()
             song = re.sub(" ", "-", song)
             author = cells[2].text.lower()
             author = re.sub(" ", "-", author)
             url = "https://www.metrolyrics.com/" + song + "-lyrics-" + author + ".html"
             song_text = find_song(url)
             if song_text != "":
-                song = re.sub("-", " ", song)
-                list_of_songs.append((song, song_text))
+                song = re.sub("-", " ", song).title()
+                author = re.sub("-", " ", author).title()
+                list_of_songs.append((author, song, song_text))
     #print(len(list_of_songs))
     #print(list_of_songs[0])
     write_to_a_file(list_of_songs)
@@ -42,9 +44,9 @@ def find_song(url):
 
 def write_to_a_file(list_of_songs):
     try:
-        my_file = open("songs.txt", "a")
+        my_file = open("songs_with_authors.txt", "w")
         for song in list_of_songs:
-            my_file.write("Title: " + song[0] + "\nLyrics:\n" + song[1])
+            my_file.write("Author: " + song[0] + "\nTitle: " + song[1] + "\nLyrics:\n" + song[2])
         my_file.close()
     except OSError:
         print("error")
