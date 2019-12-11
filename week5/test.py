@@ -12,7 +12,7 @@ from pathlib import Path
 import pke
 import time
 from decimal import Decimal
-
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 mlp.use('Agg')
 # Load the file with the wiki articles
@@ -21,7 +21,8 @@ try:
     with open(text_file,'r') as f:
         soup = BeautifulSoup(f,'lxml')
 #generate a dictinoary with the entries and the content for each article
-    list_of_articles = {art['name']:art.text for art in soup.find_all('article') }
+    dict_of_articles = {art['name']:art.text for art in soup.find_all('article') }
+    list_of_articles = list(dict_of_articles.values())
 except OSError:
     print("File not found")
 
@@ -38,6 +39,32 @@ def extract_pieces(query,content):
         #print(i, content[i-15+index1:i+100-(100-index2)*(index2>0)])
     return pieces[:min(5,len(pieces))]
 
+def search_query(query, list_of_articles, list_version):
+    query = re.sub(r'^"', '', query)
+    query = re.sub(r'"$', '', query)
+    
+    list_of_art = []
+    try:        
+        tfv = TfidfVectorizer(lowercase=True, sublinear_tf=True, use_idf=True, norm="l2")
+        sparse_matrix = tfv.fit_transform(list_version).T.tocsr()
+        query_vec = tfv.transform([query]).tocsc()        
+        hits = np.dot(query_vec, sparse_matrix)
+        ranked_scores_and_doc_ids = sorted(zip(np.array(hits[hits.nonzero()])[0], hits.nonzero()[1]), reverse=True)
+        articles = 0
+        for i, (score, doc_idx) in enumerate(ranked_scores_and_doc_ids):
+            article = list_of_articles[doc_idx]
+            query = ' ' + query
+            doc = article[article.find(query)-100:article.find(query)+100]
+            if not doc:
+                doc = article[article.find(query):article.find(query)+200]
+            articles += 1
+            article_name = re.sub(r'\n?<article name="(.*)?">\n.*', r'\1', article[:100])
+            list_of_art.append({'name':article_name, 'sisalto':doc})
+    except IndexError:
+        print("No results")
+    return list_of_art
+
+
 @app.route('/search')
 def search():
     #Delete previous plots, to avoid having too many of them
@@ -50,11 +77,11 @@ def search():
     plots = 0
     #If query not empty
     if query:
-        #Look at each entry in the example data
-        for art_name,content in list_of_articles.items():
-            #If an entry name contains the query, add the entry to matches
-            if query.lower() in content.lower():
+        list_version = list_of_articles
+        matches = search_query(query, list_of_articles, list_version)
+        for match in matches:
                 while plots <= 5:
+                    content = dict_of_articles.values()
                     extracted_content = extract_pieces(query.lower(),content)
                     matches.append({'name':art_name, 'palat':extracted_content, 'pltpath':art_name+'_plt.png' })
                     generate_individual_plots(query.lower(),art_name,content,extracted_content)
