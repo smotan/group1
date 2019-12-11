@@ -14,6 +14,7 @@ try:
     text_file = open("songs_with_authors.txt", "r")
     file_text = text_file.read()
     list_of_songs = file_text.split("Author: ")
+    list_of_songs = list(filter(None, list_of_songs))
     theme_file = open("themes1.txt", "r")
     read_themes = theme_file.read()
     remove_digits = str.maketrans('', '', digits)
@@ -57,7 +58,7 @@ def search_query(query, list_of_songs, list_version, list_of_themes):
         try:        
             tfv = TfidfVectorizer(lowercase=True, sublinear_tf=True, use_idf=True, norm="l2")
             sparse_matrix = tfv.fit_transform(list_version).T.tocsr()
-            query_vec = tfv.transform([query[0]]).tocsc()        
+            query_vec = tfv.transform([query[0]]).tocsc()       
             hits = np.dot(query_vec, sparse_matrix)
             #Index error if no hits
             ranked_scores_and_doc_ids = sorted(zip(np.array(hits[hits.nonzero()])[0], hits.nonzero()[1]), reverse=True)
@@ -99,9 +100,9 @@ def search():
             list_version = list_of_themes
         list_of_matches = search_query(query, list_of_songs, list_version, list_of_themes)
         for doc in sort_matches(list_of_matches):
-            title = re.sub(r'.*Title: (.*)(?= Lyrics).*', r'\1', doc[:100])
-            author = re.sub(r'(.*)(?= Title).*', r'\1', doc[:100])
-            text = re.sub(r'.*(?<=Lyrics: )(.*)', r'\1', doc)
+            title = re.sub('.*Title: (.*)(?= Lyrics).*', r'\1', doc[:100])
+            author = re.sub('(.*)(?= Title).*', r'\1', doc[:100])
+            text = re.sub('.*(?<=Lyrics: )(.*)', r'\1', doc)
             matches.append({'author':author, 'title':title,'sisalto':text})
 
 
