@@ -18,6 +18,7 @@ try:
     theme_file = open("themes1.txt", "r")
     read_themes = theme_file.read()
     remove_digits = str.maketrans('', '', digits)
+    #that's hard to understand, work on the nicer version
     res = read_themes.translate(remove_digits)
     res = re.sub("\[", "", res)
     res = re.sub("\(\'", "", res)
@@ -66,20 +67,12 @@ def search_query(query, list_of_songs, list_version, list_of_themes):
             for i, (score, doc_idx) in enumerate(ranked_scores_and_doc_ids):
                 article = list_of_themes[doc_idx]
                 doc = list_of_songs[doc_idx]
-                list_of_matches.append(doc)
+                list_of_matches.append((doc_idx, doc))
                 #list_of_matches.append({'sisalto':doc})
         except IndexError:
             continue
     return list_of_matches
-
-def sort_matches(list_of_matches):
-    sorted_list = []
-    final_list = []
-    sorted_list = sorted(list_of_matches, key = list_of_matches.count, reverse = True)
-    for song in sorted_list:
-        if song not in final_list:
-            final_list.append(song)
-    return final_list
+    
 
 #Function search() is associated with the address base URL + "/search"
 @app.route('/search')
@@ -99,12 +92,14 @@ def search():
         else:            
             list_version = list_of_themes
         list_of_matches = search_query(query, list_of_songs, list_version, list_of_themes)
-        for doc in sort_matches(list_of_matches):
-            title = re.sub('.*Title:.(.*).Lyrics.*', r'\1', doc[:100], flags=re.S)
-            author = re.sub('(.*).Title.*', r'\1', doc[:100], flags=re.S)
-            text = re.sub(r'.*Lyrics:.(.*)', r'\1', doc, flags=re.S)
+        for doc in list_of_matches:
+            title = re.sub('.*Title:.(.*).Lyrics.*', r'\1', doc[1][:100], flags=re.S)
+            author = re.sub('(.*).Title.*', r'\1', doc[1][:100], flags=re.S)
+            text = re.sub(r'.*Lyrics:.(.*)', r'\1', doc[1], flags=re.S)
             text = text.replace('\n', '<br>')
-            matches.append({'author':author, 'title':title,'sisalto':text})
+            doc_idx = doc[0]
+            themes = ''.join(theme for theme in list_of_themes[doc_idx])
+            matches.append({'author':author, 'title':title,'sisalto':text, 'themes':themes})
 
 
     #Render index.html with matches variable
