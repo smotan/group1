@@ -11,7 +11,7 @@ app = Flask(__name__)
 songs = []
 
 try:
-    text_file = open("songs_with_authors.txt", "r")
+    text_file = open("songs_with_authors.txt", "r", encoding="utf8")
     file_text = text_file.read()
     list_of_songs = file_text.split("Author: ")
     list_of_songs = list(filter(None, list_of_songs))
@@ -100,11 +100,15 @@ def search():
             list_version = list_of_themes
         list_of_matches = search_query(query, list_of_songs, list_version, list_of_themes)
         for doc in sort_matches(list_of_matches):
-            title = re.sub('.*Title: (.*)(?= Lyrics).*', r'\1', doc[:100])
-            author = re.sub('(.*)(?= Title).*', r'\1', doc[:100])
-            text = re.sub('.*(?<=Lyrics: )(.*)', r'\1', doc)
+            doc_nonewlines = re.sub('\n', ' ', doc)
+            title = re.sub('.*Title: (.*) Lyrics.*', r'\1', doc_nonewlines[:100])
+            author = re.sub('(.*)(?= Title).*', r'\1', doc_nonewlines[:100])
+            text = re.sub(r'.*Lyrics: (.*)', r'\1', doc_nonewlines)
+            #why not working
+            #text = re.sub(r'.*Lyrics: (.*)', r'\1', doc, 0, re.DOTALL)
             matches.append({'author':author, 'title':title,'sisalto':text})
 
 
     #Render index.html with matches variable
     return render_template('index.html', matches=matches)
+
