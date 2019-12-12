@@ -103,6 +103,7 @@ def search():
             title = re.sub('.*Title:.(.*).Lyrics.*', r'\1', doc[:100], flags=re.S)
             author = re.sub('(.*).Title.*', r'\1', doc[:100], flags=re.S)
             text = re.sub(r'.*Lyrics:.(.*)', r'\1', doc, flags=re.S)
+            text = text.replace('\n', '<br>')
             matches.append({'author':author, 'title':title,'sisalto':text})
 
 
