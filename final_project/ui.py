@@ -100,12 +100,9 @@ def search():
             list_version = list_of_themes
         list_of_matches = search_query(query, list_of_songs, list_version, list_of_themes)
         for doc in sort_matches(list_of_matches):
-            doc_nonewlines = re.sub('\n', ' ', doc)
-            title = re.sub('.*Title: (.*) Lyrics.*', r'\1', doc_nonewlines[:100])
-            author = re.sub('(.*)(?= Title).*', r'\1', doc_nonewlines[:100])
-            text = re.sub(r'.*Lyrics: (.*)', r'\1', doc_nonewlines)
-            #why not working
-            #text = re.sub(r'.*Lyrics: (.*)', r'\1', doc, 0, re.DOTALL)
+            title = re.sub('.*Title:.(.*).Lyrics.*', r'\1', doc[:100], flags=re.S)
+            author = re.sub('(.*).Title.*', r'\1', doc[:100], flags=re.S)
+            text = re.sub(r'.*Lyrics:.(.*)', r'\1', doc, flags=re.S)
             matches.append({'author':author, 'title':title,'sisalto':text})
 
 
