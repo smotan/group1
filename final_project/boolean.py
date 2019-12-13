@@ -56,14 +56,15 @@ def search_query(query, list_of_themes, list_of_songs):
     try:
         cv = CountVectorizer(lowercase=True, binary=True)
         sparse_matrix = cv.fit_transform(list_of_themes)
+        print(len(list_of_themes))
         td_matrix = sparse_matrix.todense().T
         t2i = cv.vocabulary_
 
         hits_matrix = eval(rewrite_query(query, td_matrix, t2i))
         hits_list = list(hits_matrix.nonzero()[1])
         for doc_idx in hits_list:
-           index =list_of_themes.index(list_of_themes[doc_idx])
-           list_of_art.append({'sisalto':list_of_songs[index]})
+           #index =list_of_themes.index(list_of_themes[doc_idx])
+           list_of_art.append({'sisalto':list_of_songs[doc_idx]})
         return list_of_art
 
     except ValueError:
