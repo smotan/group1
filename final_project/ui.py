@@ -47,7 +47,6 @@ def search_query(query, list_of_songs, list_version, list_of_themes):
                     if i in dict_of_matches:
                         #mega boost if second word found
                         dict_of_matches[i] += 3 * theme[1]
-                        print(dict_of_matches.get(i))
                     else:
                         dict_of_matches[i] = theme[1]
 
