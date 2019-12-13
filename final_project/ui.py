@@ -8,7 +8,7 @@ import ast
 from string import digits 
 
 
-def str2tupleList(s):
+def str2tuplelist(s):
     return eval( "[%s]" % s )
 
 #Initialize Flask instance
@@ -19,12 +19,12 @@ try:
     file_text = text_file.read()
     list_of_songs = file_text.split("Author: ")
     list_of_songs = list(filter(None, list_of_songs))
-    theme_file = open("themes.txt", "r")
+    theme_file = open("themes1.txt", "r")
     read_themes = theme_file.read()
     themes = read_themes.split("\n")
     list_of_themes = []
     for song_themes in themes:
-        list_of_themes.append(str2tupleList(song_themes))
+        list_of_themes.append(str2tuplelist(song_themes))
     #songs_and_themes = dict(zip(list_of_themes, list_of_songs))
     #list_of_songs = list(songs_and_themes.values())
     #list_of_themes = list(songs_and_themes.keys())
@@ -37,20 +37,21 @@ def search_query(query, list_of_songs, list_version, list_of_themes):
     #query = re.sub(r'"$', '', query)
     
     query = query.split()
-    list_of_matches = {}
+    dict_of_matches = {}
 
     for i in range(len(list_of_themes)):
         song_themes_and_scores = list_of_themes[i]
         if song_themes_and_scores:
-            for theme in song_themes_and_scores[0]:
+            for theme in song_themes_and_scores:
                 if theme[0] in query:
-                    if i in list_of_matches:
+                    if i in dict_of_matches:
                         #mega boost if second word found
-                        list_of_matches[i] += 3 * theme[1]
+                        dict_of_matches[i] += 3 * theme[1]
+                        print(dict_of_matches.get(i))
                     else:
-                        list_of_matches[i] = theme[1]
+                        dict_of_matches[i] = theme[1]
 
-    list_of_matches = sorted(list_of_matches, key=list_of_matches.get, reverse=True)
+    list_of_matches = sorted(dict_of_matches, key=dict_of_matches.get, reverse=True)
     return list_of_matches
     
 
@@ -79,7 +80,7 @@ def search():
             text = re.sub(r'.*Lyrics:.(.*)', r'\1', doc, flags=re.S)
             text = text.replace('\n', '<br>')
             themes = ""
-            for theme in list_of_themes[idx][0]:
+            for theme in list_of_themes[idx]:
                 themes += " "
                 themes += str(theme[0])
             matches.append({'author':author, 'title':title,'sisalto':text, 'themes':themes})
