@@ -32,29 +32,25 @@ except OSError:
     print("File not found")
           
 def search_query(query, list_of_songs, list_version, list_of_themes):
-    #that makes no sense
+    
     #query = re.sub(r'^"', '', query)
     #query = re.sub(r'"$', '', query)
     
-    extractor = pke.unsupervised.TopicRank()
-    extractor.load_document(input=query, language='en')
-    extractor.candidate_selection()
-    extractor.candidate_weighting()
-    keyphrases = extractor.get_n_best(n=10)
-    query_keyphrases = [kp[0] for kp in keyphrases]
+    query = query.split()
     list_of_matches = {}
 
     for i in range(len(list_of_themes)):
         song_themes_and_scores = list_of_themes[i]
         if song_themes_and_scores:
             for theme in song_themes_and_scores[0]:
-                if theme[0] in query_keyphrases:
+                if theme[0] in query:
                     if i in list_of_matches:
-                        list_of_matches[i] += theme[1]
+                        #mega boost if second word found
+                        list_of_matches[i] += 3 * theme[1]
                     else:
                         list_of_matches[i] = theme[1]
 
-    list_of_matches = sorted(list_of_matches, key=list_of_matches.get)
+    list_of_matches = sorted(list_of_matches, key=list_of_matches.get, reverse=True)
     return list_of_matches
     
 
