@@ -12,19 +12,23 @@ def read_from_file():
 def main():
     songs = read_from_file()
     songs =list(filter(None, songs))
-    themes = []
+        
     try:
         for song in songs:
             extractor = pke.unsupervised.TopicRank()
             extractor.load_document(input=song, language='en')
-            extractor.candidate_selection()
+            stoplist = ['Lyrics', 'lyrics']
+            extractor.candidate_selection(stoplist=stoplist)
             extractor.candidate_weighting()
-            keyphrases = extractor.get_n_best(n=10)
-            themes.append(keyphrases)
-        with open("themes1.txt", "w") as output:
-            output.write(str(themes))
+            keyphrases = extractor.get_n_best(n=10)  
+            phrases = ''          
+            if keyphrases:
+                phrases = ' '.join(kp[0] for kp in keyphrases)
+            with open("themes_without_scores.txt", "a") as output:
+                output.write(phrases + '\n')
     except ValueError:
-        print("No")
-        pass
+        with open("themes_without_scores.txt", "a") as output:
+            output.write('\n')
+            pass
 
 main()

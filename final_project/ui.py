@@ -4,73 +4,57 @@ import numpy as np
 import re
 from nltk.stem import LancasterStemmer
 import pke
+import ast
 from string import digits 
+
+
+def str2tupleList(s):
+    return eval( "[%s]" % s )
 
 #Initialize Flask instance
 app = Flask(__name__)
-songs = []
 
 try:
     text_file = open("songs_with_authors.txt", "r", encoding="utf8")
     file_text = text_file.read()
     list_of_songs = file_text.split("Author: ")
     list_of_songs = list(filter(None, list_of_songs))
-    theme_file = open("themes1.txt", "r")
+    theme_file = open("themes.txt", "r")
     read_themes = theme_file.read()
-    remove_digits = str.maketrans('', '', digits)
-    #that's hard to understand, work on the nicer version
-    res = read_themes.translate(remove_digits)
-    res = re.sub("\[", "", res)
-    res = re.sub("\(\'", "", res)
-    res = re.sub("\'\,", ",", res)
-    res = re.sub("\.\)", "", res)
-    res = re.sub(" ,", "", res)
-    list_of_themes = res.split("], ")
-    songs_and_themes = dict(zip(list_of_themes, list_of_songs))
-    list_of_songs = list(songs_and_themes.values())
-    list_of_themes = list(songs_and_themes.keys())
+    themes = read_themes.split("\n")
+    list_of_themes = []
+    for song_themes in themes:
+        list_of_themes.append(str2tupleList(song_themes))
+    #songs_and_themes = dict(zip(list_of_themes, list_of_songs))
+    #list_of_songs = list(songs_and_themes.values())
+    #list_of_themes = list(songs_and_themes.keys())
 except OSError:
     print("File not found")
-
-def parse(query, list_of_themes):
-    porter = LancasterStemmer()
-    query = porter.stem(query)
-    stem_list_of_songs = []
-    results2 = [line.split() for line in list_of_songs]
-    results2 = [ x for x in results2 if x != []]
-    for i in range(0, len(results2)):
-        l1 = results2[i]
-        l2 = ' '.join([porter.stem(word) for word in l1])
-        stem_list_of_songs.append(l2)    
-    return (query, stem_list_of_songs)
           
 def search_query(query, list_of_songs, list_version, list_of_themes):
-    query = re.sub(r'^"', '', query)
-    query = re.sub(r'"$', '', query)
+    #that makes no sense
+    #query = re.sub(r'^"', '', query)
+    #query = re.sub(r'"$', '', query)
     
     extractor = pke.unsupervised.TopicRank()
     extractor.load_document(input=query, language='en')
     extractor.candidate_selection()
     extractor.candidate_weighting()
     keyphrases = extractor.get_n_best(n=10)
-    list_of_matches = []
+    query_keyphrases = [kp[0] for kp in keyphrases]
+    list_of_matches = {}
 
-    for query in keyphrases:
-        try:        
-            tfv = TfidfVectorizer(lowercase=True, sublinear_tf=True, use_idf=True, norm="l2")
-            sparse_matrix = tfv.fit_transform(list_version).T.tocsr()
-            query_vec = tfv.transform([query[0]]).tocsc()       
-            hits = np.dot(query_vec, sparse_matrix)
-            #Index error if no hits
-            ranked_scores_and_doc_ids = sorted(zip(np.array(hits[hits.nonzero()])[0], hits.nonzero()[1]), reverse=True)
+    for i in range(len(list_of_themes)):
+        song_themes_and_scores = list_of_themes[i]
+        if song_themes_and_scores:
+            for theme in song_themes_and_scores[0]:
+                if theme[0] in query_keyphrases:
+                    if i in list_of_matches:
+                        list_of_matches[i] += theme[1]
+                    else:
+                        list_of_matches[i] = theme[1]
 
-            for i, (score, doc_idx) in enumerate(ranked_scores_and_doc_ids):
-                article = list_of_themes[doc_idx]
-                doc = list_of_songs[doc_idx]
-                list_of_matches.append((doc_idx, doc))
-                #list_of_matches.append({'sisalto':doc})
-        except IndexError:
-            continue
+    list_of_matches = sorted(list_of_matches, key=list_of_matches.get)
     return list_of_matches
     
 
@@ -87,18 +71,21 @@ def search():
 
     #If query exists (i.e. is not None)
     if query:
-        if not re.search("^\".+\"$", query):
-            (query, list_version) = parse(query, list_of_songs)
-        else:            
-            list_version = list_of_themes
+        #if not re.search("^\".+\"$", query):
+         #   (query, list_version) = parse(query)
+        #else:            
+        list_version = list_of_songs
         list_of_matches = search_query(query, list_of_songs, list_version, list_of_themes)
-        for doc in list_of_matches:
-            title = re.sub('.*Title:.(.*).Lyrics.*', r'\1', doc[1][:100], flags=re.S)
-            author = re.sub('(.*).Title.*', r'\1', doc[1][:100], flags=re.S)
-            text = re.sub(r'.*Lyrics:.(.*)', r'\1', doc[1], flags=re.S)
+        for idx in list_of_matches:
+            doc = list_of_songs[idx]
+            title = re.sub('.*Title:.(.*).Lyrics.*', r'\1', doc[:100], flags=re.S)
+            author = re.sub('(.*).Title.*', r'\1', doc[:100], flags=re.S)
+            text = re.sub(r'.*Lyrics:.(.*)', r'\1', doc, flags=re.S)
             text = text.replace('\n', '<br>')
-            doc_idx = doc[0]
-            themes = ''.join(theme for theme in list_of_themes[doc_idx])
+            themes = ""
+            for theme in list_of_themes[idx][0]:
+                themes += " "
+                themes += str(theme[0])
             matches.append({'author':author, 'title':title,'sisalto':text, 'themes':themes})
 
 
