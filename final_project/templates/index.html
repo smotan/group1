@@ -34,16 +34,30 @@ id="user_input"            margin: 10px;
            font-family: Arial ;
            text-decoration: none;
         }
+        nav {
+            float: right;
+            width: 30%;
+            background: #ccc;
+            padding: 20px;
+        }
+
         </style>
     </head>
     <body>
-
+       
         <h1 class="arial" style="font-size:60px; ">Find songs<img src="/static/magnifying-glass.png" style="width: 156px; height: 160"  alt="Magnifying glass"></h1>
         <!--Reload the page with variable "query" in the URL-->
         <form>
             <input type="text" name="query" autofocus>
             <input type="submit" value="Search">
-        </form>        
+        </form>
+           <section>
+                 <nav>
+                 <h3 class="arial" style="color:black"> Don't know what to search for? Try these themes </h3>
+                 {% for item in random_themes %}
+                 <h4 class="arial" style="color:black">{{ item }} </h4>
+                 {% endfor %}
+                 </nav>
             {% for item in matches %}
             <div>    <!--Display the name of the item based on the "name" key-->
                 <h3 class="arial" style="color:black">{{ item["author"] }}</h3>
@@ -56,5 +70,6 @@ id="user_input"            margin: 10px;
             <!--End for loop-->
             </div>
             {% endfor %}
+            </section>
     </body>
 </html>

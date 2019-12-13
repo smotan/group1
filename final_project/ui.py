@@ -6,7 +6,7 @@ from nltk.stem import LancasterStemmer
 import pke
 import ast
 from string import digits 
-
+import random
 
 def str2tupleList(s):
     return eval( "[%s]" % s )
@@ -25,9 +25,7 @@ try:
     list_of_themes = []
     for song_themes in themes:
         list_of_themes.append(str2tupleList(song_themes))
-    #songs_and_themes = dict(zip(list_of_themes, list_of_songs))
-    #list_of_songs = list(songs_and_themes.values())
-    #list_of_themes = list(songs_and_themes.keys())
+
 except OSError:
     print("File not found")
           
@@ -52,7 +50,21 @@ def search_query(query, list_of_songs, list_version, list_of_themes):
 
     list_of_matches = sorted(list_of_matches, key=list_of_matches.get, reverse=True)
     return list_of_matches
-    
+
+def find_random(list_of_themes):
+    list_of_themes = str(list_of_themes)
+    remove_digits = str.maketrans('', '', digits)
+    res = list_of_themes.translate(remove_digits)
+    res = re.sub("\[", "", res)
+    res = re.sub("\(\'", "", res)
+    res = re.sub("\'\,", ",", res)
+    res = re.sub("\.\)", "", res)
+    res = re.sub(" ,", "", res)
+    res = re.sub("]", "", res)
+    list_of_themes = res.split(",")
+    num_to_select = 10                           # set the number to select here.
+    list_of_random_items = random.sample(list_of_themes, num_to_select)
+    return(list_of_random_items)
 
 #Function search() is associated with the address base URL + "/search"
 @app.route('/search')
@@ -60,8 +72,10 @@ def search():
 
     #Get query from URL variable
     query = request.args.get('query')
-
+    random_themes = []
+    random_themes = find_random(list_of_themes)
     #Initialize list of matches
+    boolean_matches = []
     matches = []
     list_of_matches = []
 
@@ -69,7 +83,7 @@ def search():
     if query:
         #if not re.search("^\".+\"$", query):
          #   (query, list_version) = parse(query)
-        #else:            
+        #else:
         list_version = list_of_songs
         list_of_matches = search_query(query, list_of_songs, list_version, list_of_themes)
         for idx in list_of_matches:
@@ -86,5 +100,5 @@ def search():
 
 
     #Render index.html with matches variable
-    return render_template('index.html', matches=matches)
+    return render_template('index.html', matches=matches, random_themes=random_themes)
 
