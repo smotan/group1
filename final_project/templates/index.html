@@ -3,6 +3,9 @@
         <meta charset="utf-8">
         <title>Search engine</title>
         <style>
+        body {
+            background-color:#c4edc4;
+        }
         input[type=text]{
             border: 2px solid black;
             border-radius:4pc;
@@ -23,9 +26,9 @@
             width: 800px;
             padding: 10px;
             border: 2px solid black;
-id="user_input"            margin: 10px;
+            margin: 10px;
             border-radius: 4px;
-            background-color:  #B0E0E6;
+            background-color:  #8cd98c;
             }
         p.arial {
             font-family: Arial, Helvetica ,sans-serif;
@@ -35,34 +38,39 @@ id="user_input"            margin: 10px;
            text-decoration: none;
         }
         nav {
-            float: right;
-            width: 30%;
-            background: #ccc;
-            padding: 20px;
+            position:absolute;
+            width: 15%;
+            background: #8cd98c;
+        }
+        box {
+            position:absolute;
+            left:300px;
         }
 
         </style>
     </head>
     <body>
        
-        <h1 class="arial" style="font-size:60px; ">Find songs<img src="/static/magnifying-glass.png" style="width: 156px; height: 160"  alt="Magnifying glass"></h1>
         <!--Reload the page with variable "query" in the URL-->
-        <form>
+        <nav>
+            <img src="/static/magnifying-glass.png" style="width: 156px; height: 160"  alt="Magnifying glass">
+            <h3 class="arial" style="color:#1f601f"> Don't know what to search for? <br> Try these themes </h3>
+            {% for item in random_themes %}
+            <h4 class="arial" style="color:black">{{ item }} </h4>
+            {% endfor %}
+        </nav>
+        <box>
+          <h1 class="arial" style="font-size:60px;">Find songs</h1>
+          <form>
             <input type="text" name="query" autofocus>
             <input type="submit" value="Search">
-        </form>
-           <section>
-                 <nav>
-                 <h3 class="arial" style="color:black"> Don't know what to search for? Try these themes </h3>
-                 {% for item in random_themes %}
-                 <h4 class="arial" style="color:black">{{ item }} </h4>
-                 {% endfor %}
-                 </nav>
+          </form>
+          <section>
             {% for item in matches %}
             <div>    <!--Display the name of the item based on the "name" key-->
                 <h3 class="arial" style="color:black">{{ item["author"] }}</h3>
                 <h4 class="arial" style="color:black">{{ item["title"] }}</h4>
-                <h4 class="arial" style="color:blue">Themes: {{ item["themes"] }} </h4>
+                <h4 class="arial" style="color:#1f601f">Themes: {{ item["themes"] }} </h4>
                 {% autoescape false %}
                   <p class="arial">{{item["sisalto"]}}</p>
                 {% endautoescape %}
@@ -70,6 +78,7 @@ id="user_input"            margin: 10px;
             <!--End for loop-->
             </div>
             {% endfor %}
-            </section>
+          </section>
+        </box>
     </body>
 </html>

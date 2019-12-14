@@ -24,8 +24,6 @@ try:
     themes = read_themes.split("\n")
     list_of_themes = []
     for song_themes in themes:
-        list_of_themes.append(str2tupleList(song_themes))
-
         list_of_themes.append(str2tuplelist(song_themes))
     #songs_and_themes = dict(zip(list_of_themes, list_of_songs))
     #list_of_songs = list(songs_and_themes.values())
