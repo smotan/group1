@@ -31,7 +31,7 @@ try:
 
 except OSError:
     print("File not found")
-          
+
 
 def search_more_words(query):
     list_of_idx = []
@@ -41,6 +41,13 @@ def search_more_words(query):
             for theme in song_themes_and_scores:
                 if theme[0] == query:
                     list_of_idx.append(i)
+    return list_of_idx
+
+def literal_search(query):
+    list_of_idx = []
+    for i in range(len(list_of_songs)):
+        if query in list_of_songs[i].lower():
+            list_of_idx.append(i)
     return list_of_idx
 
 def search_query(query):
@@ -98,8 +105,10 @@ def search():
         #if not re.search("^\".+\"$", query):
         #    (query, list_version) = parse(query)
         #else:
+        query = query.lower()
+        list_of_matches = literal_search(query)
         if len(query.split()) > 1:
-            list_of_matches = search_more_words(query)
+            list_of_matches.extend(search_more_words(query))
         list_of_matches.extend(search_query(query))
      
         for idx in list_of_matches:
