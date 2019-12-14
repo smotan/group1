@@ -48,7 +48,6 @@
             {% for item in matches %}
             <div>    <!--Display the name of the item based on the "name" key-->
                 <h3 class="arial" style="color:black"><a href="https://en.wikipedia.org/wiki/{{item["name"]}}" target="_blank">{{ item["name"] }}</a></h3>
-                <p class="arial">{{item["palat"]}}</p>
                 <img src="/static/{{ item['pltpath'] }}" style="width: 300px; height 100%">
 
             <!--End for loop-->

@@ -60,6 +60,7 @@ def search_query(query, list_of_articles, list_version):
             articles += 1
             article_name = re.sub(r'\n?<article name="(.*)?">\n.*', r'\1', article[:100])
             list_of_art.append({'name':article_name, 'sisalto':doc})
+
     except IndexError:
         print("No results")
     return list_of_art
@@ -80,11 +81,10 @@ def search():
         list_version = list_of_articles
         matches = search_query(query, list_of_articles, list_version)
         for match in matches:
+                print(match)
+                content = match
                 while plots <= 5:
-                    content = dict_of_articles.values()
-                    extracted_content = extract_pieces(query.lower(),content)
-                    matches.append({'name':art_name, 'palat':extracted_content, 'pltpath':art_name+'_plt.png' })
-                    generate_individual_plots(query.lower(),art_name,content,extracted_content)
+                    generate_individual_plots(query.lower(),plots,content)
                     plots += 1
                     if plots < 5:
                         break
@@ -94,9 +94,10 @@ def search():
         return render_template('indexempty.html', matches=[])
 
 
-def generate_individual_plots(query, art_name, content, pieces):
+def generate_individual_plots(query, plots, content):
     # YOUR code here:
     sisalto = ''.join(content)
+    plot = str(plots)
     try:
         extractor = pke.unsupervised.TopicRank()
         extractor.load_document(input=sisalto[0:1000], language='en')
@@ -114,5 +115,5 @@ def generate_individual_plots(query, art_name, content, pieces):
         plt.title('Themes in the article')
     except ValueError: #Pass if there are no themes in the text
         pass  
-    plt.savefig('static/'+art_name+'_plt.png')
+    plt.savefig('static/'+plot+'_plt.png')
 
