@@ -32,7 +32,18 @@ try:
 except OSError:
     print("File not found")
           
-def search_query(query, list_of_songs, list_version, list_of_themes):
+
+def search_more_words(query):
+    list_of_idx = []
+    for i in range(len(list_of_themes)):
+        song_themes_and_scores = list_of_themes[i]
+        if song_themes_and_scores:
+            for theme in song_themes_and_scores:
+                if theme[0] == query:
+                    list_of_idx.append(i)
+    return list_of_idx
+
+def search_query(query):
     
     #query = re.sub(r'^"', '', query)
     #query = re.sub(r'"$', '', query)
@@ -85,10 +96,12 @@ def search():
     #If query exists (i.e. is not None)
     if query:
         #if not re.search("^\".+\"$", query):
-         #   (query, list_version) = parse(query)
+        #    (query, list_version) = parse(query)
         #else:
-        list_version = list_of_songs
-        list_of_matches = search_query(query, list_of_songs, list_version, list_of_themes)
+        if len(query.split()) > 1:
+            list_of_matches = search_more_words(query)
+        list_of_matches.extend(search_query(query))
+     
         for idx in list_of_matches:
             doc = list_of_songs[idx]
             title = re.sub('.*Title:.(.*).Lyrics.*', r'\1', doc[:100], flags=re.S)

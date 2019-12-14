@@ -20,14 +20,14 @@ def main():
             stoplist = ['Lyrics', 'lyrics', 'Author', 'author']
             extractor.candidate_selection(stoplist=stoplist)
             extractor.candidate_weighting()
-            keyphrases = extractor.get_n_best(n=10)  
+            keyphrases = extractor.get_n_best(n=15)  
             phrases = ''          
             if keyphrases:
                 phrases = ', '.join(str(kp) for kp in keyphrases)
-            with open("themes1.txt", "a") as output:
+            with open("themes.txt", "a") as output:
                 output.write(phrases + '\n')
     except ValueError:
-        with open("themes1.txt", "a") as output:
+        with open("themes.txt", "a") as output:
             output.write('\n')
             pass
 
