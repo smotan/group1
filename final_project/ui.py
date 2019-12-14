@@ -25,6 +25,8 @@ try:
     list_of_themes = []
     for song_themes in themes:
         list_of_themes.append(str2tuplelist(song_themes))
+    #WE WANT to have list of songs as list of triples (author, title, song)!!!!!!!!!!!!!!
+
     #songs_and_themes = dict(zip(list_of_themes, list_of_songs))
     #list_of_songs = list(songs_and_themes.values())
     #list_of_themes = list(songs_and_themes.keys())
@@ -108,8 +110,14 @@ def search():
         query = query.lower()
         list_of_matches = literal_search(query)
         if len(query.split()) > 1:
-            list_of_matches.extend(search_more_words(query))
-        list_of_matches.extend(search_query(query))
+            list_idx = search_more_words(query)
+            for idx in list_idx:
+                if idx not in list_of_matches:
+                    list_of_matches.append(idx)
+        list_idx = search_query(query)
+        for idx in list_idx:
+                if idx not in list_of_matches:
+                    list_of_matches.append(idx)
      
         for idx in list_of_matches:
             doc = list_of_songs[idx]
