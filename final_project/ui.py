@@ -7,6 +7,7 @@ import pke
 import ast
 from string import digits 
 import random
+from sklearn.feature_extraction.text import CountVectorizer
 
 def str2tuplelist(s):
     return eval( "[%s]" % s )
@@ -26,10 +27,6 @@ try:
     for song_themes in themes:
         list_of_themes.append(str2tuplelist(song_themes))
     #WE WANT to have list of songs as list of triples (author, title, song)!!!!!!!!!!!!!!
-
-    #songs_and_themes = dict(zip(list_of_themes, list_of_songs))
-    #list_of_songs = list(songs_and_themes.values())
-    #list_of_themes = list(songs_and_themes.keys())
 
 except OSError:
     print("File not found")
@@ -53,10 +50,7 @@ def literal_search(query):
     return list_of_idx
 
 def search_query(query):
-    
-    #query = re.sub(r'^"', '', query)
-    #query = re.sub(r'"$', '', query)
-    
+
     query = query.split()
     dict_of_matches = {}
 
@@ -74,6 +68,7 @@ def search_query(query):
     list_of_matches = sorted(dict_of_matches, key=dict_of_matches.get, reverse=True)
     return list_of_matches
 
+#Gets random themes to show on the website
 def find_random(list_of_themes):
     list_of_themes = str(list_of_themes)
     remove_digits = str.maketrans('', '', digits)
@@ -89,12 +84,46 @@ def find_random(list_of_themes):
     list_of_random_items = random.sample(list_of_themes, num_to_select)
     return(list_of_random_items)
 
+def rewrite_token(t, td_matrix, t2i):
+    d = {"and": "&", "AND": "&",
+     "or": "|", "OR": "|",
+     "not": "1 -", "NOT": "1 -",
+     "(": "(", ")": ")"}
+    return d.get(t, 'td_matrix[t2i["{:s}"]]'.format(t)) 
+
+
+def rewrite_query(themes_query, td_matrix, t2i): # rewrite every token in the query
+    return " ".join(rewrite_token(t, td_matrix, t2i) for t in themes_query.split())
+
+
+def search_themes(themes_query, list_of_themes, list_of_songs):
+    list_of_art = []
+    remove_digits = str.maketrans('', '', digits)
+    res = list_of_themes.translate(remove_digits)
+    themes = str(list_of_themes)
+
+    try:
+        cv = CountVectorizer(lowercase=True, binary=True)
+        sparse_matrix = cv.fit_transform(themes)
+        td_matrix = sparse_matrix.todense().T
+        t2i = cv.vocabulary_
+
+        hits_matrix = eval(rewrite_query(themes_query, td_matrix, t2i))
+        hits_list = list(hits_matrix.nonzero()[1])
+        for doc_idx in hits_list:
+           #index = list_of_themes.index(list_of_themes[doc_idx])
+           list_of_art.append({'sisalto':list_of_songs[doc_idx]})
+        return list_of_art
+    except ValueError:
+        pass
+
 #Function search() is associated with the address base URL + "/search"
 @app.route('/search')
 def search():
 
     #Get query from URL variable
     query = request.args.get('query')
+    themes_query = request.args.get('themes_query')
     random_themes = []
     random_themes = find_random(list_of_themes)
     #Initialize list of matches
@@ -102,7 +131,7 @@ def search():
     matches = []
     list_of_matches = []
 
-    #If query exists (i.e. is not None)
+    #If query exists (i.e. is not None) and user searches for words in the text
     if query:
         #if not re.search("^\".+\"$", query):
         #    (query, list_version) = parse(query)
@@ -131,6 +160,9 @@ def search():
                 themes += str(theme[0])
             matches.append({'author':author, 'title':title,'sisalto':text, 'themes':themes})
 
+    #If user searches themes
+    elif themes_query:
+        matches = search_themes(themes_query, list_of_themes, list_of_songs)
 
     #Render index.html with matches variable
     return render_template('index.html', matches=matches, random_themes=random_themes)
