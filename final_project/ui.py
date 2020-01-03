@@ -98,9 +98,16 @@ def rewrite_query(themes_query, td_matrix, t2i): # rewrite every token in the qu
 
 def search_themes(themes_query, list_of_themes, list_of_songs):
     list_of_art = []
+    list_of_themes = str(list_of_themes)
     remove_digits = str.maketrans('', '', digits)
     res = list_of_themes.translate(remove_digits)
-    themes = str(list_of_themes)
+    res = re.sub("\[", "", res)
+    res = re.sub("\(\'", "", res)
+    res = re.sub("\'\,", ",", res)
+    res = re.sub("\.\)", "", res)
+    res = re.sub(" ,", "", res)
+    res = re.sub("]", "", res)
+    list_of_themes = res.split(",")
 
     try:
         cv = CountVectorizer(lowercase=True, binary=True)
