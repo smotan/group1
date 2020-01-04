@@ -95,19 +95,9 @@ def rewrite_token(t, td_matrix, t2i):
 def rewrite_query(themes_query, td_matrix, t2i): # rewrite every token in the query
     return " ".join(rewrite_token(t, td_matrix, t2i) for t in themes_query.split())
 
-
+#Searches for matches in the list of themes
 def search_themes(themes_query, list_of_themes, list_of_songs):
     list_of_art = []
-    list_of_themes = str(list_of_themes)
-    remove_digits = str.maketrans('', '', digits)
-    res = list_of_themes.translate(remove_digits)
-    res = re.sub("\[", "", res)
-    res = re.sub("\(\'", "", res)
-    res = re.sub("\'\,", ",", res)
-    res = re.sub("\.\)", "", res)
-    res = re.sub(" ,", "", res)
-    res = re.sub("]", "", res)
-    list_of_themes = res.split(",")
 
     try:
         cv = CountVectorizer(lowercase=True, binary=True)
@@ -118,11 +108,22 @@ def search_themes(themes_query, list_of_themes, list_of_songs):
         hits_matrix = eval(rewrite_query(themes_query, td_matrix, t2i))
         hits_list = list(hits_matrix.nonzero()[1])
         for doc_idx in hits_list:
-           #index = list_of_themes.index(list_of_themes[doc_idx])
-           list_of_art.append({'sisalto':list_of_songs[doc_idx]})
+            doc = list_of_songs[doc_idx]
+            title = re.sub('.*Title:.(.*).Lyrics.*', r'\1', doc[:100], flags=re.S)
+            author = re.sub('(.*).Title.*', r'\1', doc[:100], flags=re.S)
+            text = re.sub(r'.*Lyrics:.(.*)', r'\1', doc, flags=re.S)
+            text = text.replace('\n', '<br>')
+            teemat = ""
+            for theme in list_of_themes[doc_idx]:
+                teemat += " "
+                teemat += str(theme[0])
+            list_of_art.append({'author':author, 'title':title,'sisalto':text, 'themes':teemat})
+
         return list_of_art
     except ValueError:
         pass
+    except KeyError:
+        print("No results")
 
 #Function search() is associated with the address base URL + "/search"
 @app.route('/search')
@@ -167,7 +168,7 @@ def search():
                 themes += str(theme[0])
             matches.append({'author':author, 'title':title,'sisalto':text, 'themes':themes})
 
-    #If user searches themes
+    #If user searches for matches in the list of themes
     elif themes_query:
         matches = search_themes(themes_query, list_of_themes, list_of_songs)
 
