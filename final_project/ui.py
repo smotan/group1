@@ -123,7 +123,8 @@ def search_themes(themes_query, list_of_themes, list_of_songs):
     except ValueError:
         pass
     except KeyError:
-        print("No results")
+        matches = []
+        return matches
 
 #Function search() is associated with the address base URL + "/search"
 @app.route('/search')
