@@ -96,9 +96,10 @@ def find_random():
 # not theme ei toimi
 # sen pitää olla and not ni toimii
 # mutta pelkkä not love esim.
+# aivan 
 # nyt ei teemahaku löydä mitää jos hakee christmas, enkä tiiä miks, esim christmas and gravy taas löytyy ja noi boolean operaattorit ei toimi enää ollenkaan
 # nyt teemoissa ei ole sitä christmas enää, voi vielä kokeilla toista metodia siihen themes extractioniin
-
+# minne se christmas sit hävis? meijän pitäis varmaa päättää et käytetäänkö tota booleania vai ei. En enää oo varma et miten tää meijän haku toimii ni en oikei tiiä mitä tehä
 #def rewrite_query(themes_query, td_matrix, t2i): # rewrite every token in the query
 #    return " ".join(rewrite_token(t, td_matrix, t2i) for t in themes_query.split())
 
