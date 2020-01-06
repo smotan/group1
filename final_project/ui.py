@@ -102,6 +102,10 @@ def rewrite_token(t, td_matrix, t2i):
 # minne se christmas sit hävis? meijän pitäis varmaa päättää et käytetäänkö tota booleania vai ei. En enää oo varma et miten tää meijän haku toimii ni en oikei tiiä mitä tehä
 # se themes.py jotenkin ei enää löytänyt sitä
 # lisäsin sen boolean search jos joku niistä sanoista on haussa
+# siis miun mielestä kun mie tein tota booleania ni varmasti löyty christmas, koska kokeilin sillä et tuleeko eri tulokset eri hauista
+# miusta tuntuu että se christmas teema on vaihtunu christmas day teemaks jostain syystä jossain vaiheessa
+# tää ei oo täydellinen mitenkää, mut haluutko sie vielä tehä tälle jotain? mie en enää jaksa keksii mitä tehä mut jos siulla on jotain ehdotuksia ni voin auttaa
+# pitää sit päättää et missä vaiheessa jompi kumpi poistaa nää keskustelut täältä :D
 
 def rewrite_query(themes_query, td_matrix, t2i): # rewrite every token in the query
     return " ".join(rewrite_token(t, td_matrix, t2i) for t in themes_query.split())
