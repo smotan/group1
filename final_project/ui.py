@@ -9,6 +9,8 @@ import ast
 from string import digits 
 import random
 from sklearn.feature_extraction.text import CountVectorizer
+from bs4 import BeautifulSoup as bs
+import requests
 
 def str2tuplelist(s):
     return eval( "[%s]" % s )
@@ -106,6 +108,9 @@ def rewrite_token(t, td_matrix, t2i):
 # miusta tuntuu että se christmas teema on vaihtunu christmas day teemaks jostain syystä jossain vaiheessa
 # tää ei oo täydellinen mitenkää, mut haluutko sie vielä tehä tälle jotain? mie en enää jaksa keksii mitä tehä mut jos siulla on jotain ehdotuksia ni voin auttaa
 # pitää sit päättää et missä vaiheessa jompi kumpi poistaa nää keskustelut täältä :D
+# joo, se on nyt christmass day jostain syystä. yritin tehä uudestaan sen themes extractionin mut ei myös tule pelkkä christmas
+# ei enää tule mieleen mitä voisi vielä tehdä, ehkä jo riittää?
+# nyt sain youtube linkit toimimaan, mut se sitten toimii tosi hitaasti
 
 def rewrite_query(themes_query, td_matrix, t2i): # rewrite every token in the query
     return " ".join(rewrite_token(t, td_matrix, t2i) for t in themes_query.split())
@@ -130,6 +135,23 @@ def boolean_search_themes(themes_query):
     except KeyError:
         matches = []
         return matches
+
+def get_youtube_link(author, title):
+    base="https://www.youtube.com/results?search_query="
+    query = ""
+    
+    for word in author.split():
+        query += word + "+"
+    query += "+".join(title.split())
+
+    r = requests.get(base+query)
+    page=r.text
+    soup=bs(page,'html.parser')
+
+    vids = soup.findAll('a',attrs={'class':'yt-uix-tile-link'})
+
+    videourl = 'https://www.youtube.com' + vids[0]['href']
+    return videourl
 
 #Function search() is associated with the address base URL + "/search"
 @app.route('/search')
@@ -162,7 +184,8 @@ def search():
             themes = ""
             for themes_and_scores in list_of_themes[idx]:
                 themes += themes_and_scores[0] + " "
-            matches.append({'author':author, 'title':title,'sisalto':text, 'themes':themes})
+            link = get_youtube_link(author, title)
+            matches.append({'author':author, 'title':title,'sisalto':text, 'themes':themes, 'link':link})
 
     #If user searches for matches in the list of themes
     elif themes_query:
@@ -182,7 +205,8 @@ def search():
             themes = ""
             for themes_and_scores in list_of_themes[idx]:
                 themes += themes_and_scores[0] + " "
-            matches.append({'author':author, 'title':title,'sisalto':text, 'themes':themes})
+            link = get_youtube_link(author, title)
+            matches.append({'author':author, 'title':title,'sisalto':text, 'themes':themes, 'link':link})
 
 
     #Render index.html with matches variable
