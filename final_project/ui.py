@@ -94,6 +94,8 @@ def find_random():
     #return d.get(t, 'td_matrix[t2i["{:s}"]]'.format(t)) 
 
 # not theme ei toimi
+# sen pitää olla and not ni toimii
+# nyt ei teemahaku löydä mitää jos hakee christmas, enkä tiiä miks, esim christmas and gravy taas löytyy ja noi boolean operaattorit ei toimi enää ollenkaan
 # PS mulla puhelin meni rikki ja ei oo nyt whatsappia, voi kommentoida tässä !!!
 #def rewrite_query(themes_query, td_matrix, t2i): # rewrite every token in the query
 #    return " ".join(rewrite_token(t, td_matrix, t2i) for t in themes_query.split())
