@@ -86,12 +86,12 @@ def find_random():
     
     return(list_of_random_items)
 
-#def rewrite_token(t, td_matrix, t2i):
- #   d = {"and": "&", "AND": "&",
-  #   "or": "|", "OR": "|",
-   #  "not": "1 -", "NOT": "1 -",
-    # "(": "(", ")": ")"}
-    #return d.get(t, 'td_matrix[t2i["{:s}"]]'.format(t)) 
+def rewrite_token(t, td_matrix, t2i):
+    d = {"and": "&", "AND": "&",
+     "or": "|", "OR": "|",
+     "not": "1 -", "NOT": "1 -",
+     "(": "(", ")": ")"}
+    return d.get(t, 'td_matrix[t2i["{:s}"]]'.format(t)) 
 
 # not theme ei toimi
 # sen pitää olla and not ni toimii
@@ -100,40 +100,32 @@ def find_random():
 # nyt ei teemahaku löydä mitää jos hakee christmas, enkä tiiä miks, esim christmas and gravy taas löytyy ja noi boolean operaattorit ei toimi enää ollenkaan
 # nyt teemoissa ei ole sitä christmas enää, voi vielä kokeilla toista metodia siihen themes extractioniin
 # minne se christmas sit hävis? meijän pitäis varmaa päättää et käytetäänkö tota booleania vai ei. En enää oo varma et miten tää meijän haku toimii ni en oikei tiiä mitä tehä
-#def rewrite_query(themes_query, td_matrix, t2i): # rewrite every token in the query
-#    return " ".join(rewrite_token(t, td_matrix, t2i) for t in themes_query.split())
+# se themes.py jotenkin ei enää löytänyt sitä
+# lisäsin sen boolean search jos joku niistä sanoista on haussa
 
-#Searches for matches in the list of themes
-#def search_themes(themes_query, list_of_themes, list_of_songs):
-#    list_of_art = []
+def rewrite_query(themes_query, td_matrix, t2i): # rewrite every token in the query
+    return " ".join(rewrite_token(t, td_matrix, t2i) for t in themes_query.split())
 
-#    try:
-#        cv = CountVectorizer(lowercase=True, binary=True)
-#        sparse_matrix = cv.fit_transform(themes)
-#        td_matrix = sparse_matrix.todense().T
-#        t2i = cv.vocabulary_
+# Searches for matches in the list of themes; boolean search
+def boolean_search_themes(themes_query):
+    list_of_art = []
 
-#        hits_matrix = eval(rewrite_query(themes_query, td_matrix, t2i))
-#        hits_list = list(hits_matrix.nonzero()[1])
-#        for doc_idx in hits_list:
-#            doc = list_of_songs[doc_idx]
-#            title = re.sub('.*Title:.(.*).Lyrics.*', r'\1', doc[:100], flags=re.S)
-#            author = re.sub('(.*).Title.*', r'\1', doc[:100], flags=re.S)
-#            text = re.sub(r'.*Lyrics:.(.*)', r'\1', doc, flags=re.S)
-#            text = text.replace('\n', '<br>')
-#            teemat = ""
-#            for theme in list_of_themes[doc_idx]:
-                #teemat += " "
-                #teemat += str(theme[0])
-#                teemat = " ".join(str(theme[0]))
-#            list_of_art.append({'author':author, 'title':title,'sisalto':text, 'themes':teemat})
+    try:
+        cv = CountVectorizer(lowercase=True, binary=True)
+        sparse_matrix = cv.fit_transform(themes)
+        td_matrix = sparse_matrix.todense().T
+        t2i = cv.vocabulary_
 
-#        return list_of_art
-#    except ValueError:
-#        pass
-#    except KeyError:
-#        matches = []
-#        return matches
+        hits_matrix = eval(rewrite_query(themes_query, td_matrix, t2i))
+        hits_list = list(hits_matrix.nonzero()[1])
+        return hits_list
+
+    except ValueError:
+        pass
+
+    except KeyError:
+        matches = []
+        return matches
 
 #Function search() is associated with the address base URL + "/search"
 @app.route('/search')
@@ -170,10 +162,13 @@ def search():
 
     #If user searches for matches in the list of themes
     elif themes_query:
-        list_of_matches = search_more_words_as_a_theme(themes_query)
-        for result in search_theme(themes_query):
-            if result not in list_of_matches:
-                list_of_matches.append(result)
+        if (" not " or " NOT " or " or " or " OR " or " and " or "AND ") in themes_query:
+            list_of_matches = boolean_search_themes(themes_query)
+        else:
+            list_of_matches = search_more_words_as_a_theme(themes_query)
+            for result in search_theme(themes_query):
+                if result not in list_of_matches:
+                    list_of_matches.append(result)
         for idx in list_of_matches:
             doc = list_of_songs[idx]
             title = re.sub('.*Title:.(.*).Lyrics.*', r'\1', doc[:100], flags=re.S)
