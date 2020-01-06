@@ -111,6 +111,9 @@ def rewrite_token(t, td_matrix, t2i):
 # joo, se on nyt christmass day jostain syystä. yritin tehä uudestaan sen themes extractionin mut ei myös tule pelkkä christmas
 # ei enää tule mieleen mitä voisi vielä tehdä, ehkä jo riittää?
 # nyt sain youtube linkit toimimaan, mut se sitten toimii tosi hitaasti
+# joo toi on tosi hidas, varsinki jos on paljon tuloksia. hain tekstihaussa 'devil' ja sain IndexErrorin, mutta sain sen varmaan korjattuu. mut toi on kyllä muuten hirmu hyvä vaikka onki hidas
+# miun puolesta sie voit poistaa tän keskustelun täältä jos siulla ei oo mitään mistä haluisit keskustella
+# miusta tää on ihan hyvä tälläsenä, mut voin kyllä auttaa tekemäänki jotain jos vielä tulee jotain mielee
 
 def rewrite_query(themes_query, td_matrix, t2i): # rewrite every token in the query
     return " ".join(rewrite_token(t, td_matrix, t2i) for t in themes_query.split())
@@ -140,18 +143,21 @@ def get_youtube_link(author, title):
     base="https://www.youtube.com/results?search_query="
     query = ""
     
-    for word in author.split():
-        query += word + "+"
-    query += "+".join(title.split())
+    try:
+        for word in author.split():
+            query += word + "+"
+        query += "+".join(title.split())
 
-    r = requests.get(base+query)
-    page=r.text
-    soup=bs(page,'html.parser')
+        r = requests.get(base+query)
+        page=r.text
+        soup=bs(page,'html.parser')
 
-    vids = soup.findAll('a',attrs={'class':'yt-uix-tile-link'})
+        vids = soup.findAll('a',attrs={'class':'yt-uix-tile-link'})
 
-    videourl = 'https://www.youtube.com' + vids[0]['href']
-    return videourl
+        videourl = 'https://www.youtube.com' + vids[0]['href']
+        return videourl
+    except IndexError:
+        pass
 
 #Function search() is associated with the address base URL + "/search"
 @app.route('/search')
