@@ -1,3 +1,4 @@
+#This is the actual search tool
 from flask import Flask, render_template, request
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np

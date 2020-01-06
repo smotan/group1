@@ -1,3 +1,4 @@
+#A program to perform themes extraction
 import pke
 
 def read_from_file():   
