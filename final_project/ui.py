@@ -17,11 +17,11 @@ def str2tuplelist(s):
 app = Flask(__name__)
 
 try:
-    text_file = open("songs_with_authors.txt", "r", encoding="utf8")
+    text_file = open("data/songs_with_authors.txt", "r", encoding="utf8")
     file_text = text_file.read()
     list_of_songs = file_text.split("Author: ")
     list_of_songs = list(filter(None, list_of_songs))
-    theme_file = open("themes1.txt", "r")
+    theme_file = open("data/themes1.txt", "r")
     read_themes = theme_file.read()
 
     # themes is a list of strings in the format (theme, score) - up to ten themes for each song, seperated with ", "
