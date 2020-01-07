@@ -1,4 +1,6 @@
 # Song search
+This programme allows you to search for songs by their lyrics or their themes. 
+
 ## Prerequisites
 ## [Install Flask](http://flask.pocoo.org/docs/1.0/installation/)
 We will install Flask in a virtual environment to contain it.
