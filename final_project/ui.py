@@ -19,7 +19,7 @@ def str2tuplelist(s):
 app = Flask(__name__)
 
 try:
-    text_file = open("data/songs_with_authors.txt", "r", encoding="utf8")
+    text_file = open("data/songs_with_authors_and_links.txt", "r", encoding="utf8")
     file_text = text_file.read()
     list_of_songs = file_text.split("Author: ")
     list_of_songs = list(filter(None, list_of_songs))
@@ -119,26 +119,6 @@ def boolean_search_themes(themes_query):
         matches = []
         return matches
 
-def get_youtube_link(author, title):
-    base="https://www.youtube.com/results?search_query="
-    query = ""
-    
-    try:
-        for word in author.split():
-            query += word + "+"
-        query += "+".join(title.split())
-
-        r = requests.get(base+query)
-        page=r.text
-        soup=bs(page,'html.parser')
-
-        vids = soup.findAll('a',attrs={'class':'yt-uix-tile-link'})
-
-        videourl = 'https://www.youtube.com' + vids[0]['href']
-        return videourl
-    except IndexError:
-        pass
-
 #Function search() is associated with the address base URL + "/search"
 @app.route('/search')
 def search():
@@ -165,12 +145,12 @@ def search():
             doc = list_of_songs[idx]
             title = re.sub('.*Title:.(.*).Lyrics.*', r'\1', doc[:100], flags=re.S)
             author = re.sub('(.*).Title.*', r'\1', doc[:100], flags=re.S)
-            text = re.sub(r'.*Lyrics:.(.*)', r'\1', doc, flags=re.S)
+            text = re.sub(r'.*Lyrics:.(.*)Youtube:.*', r'\1', doc, flags=re.S)
             text = text.replace('\n', '<br>')
+            link = re.sub(r'.*Lyrics:.*Youtube: (.*)', r'\1', doc, flags=re.S)
             themes = ""
             for themes_and_scores in list_of_themes[idx]:
                 themes += themes_and_scores[0] + " "
-            link = get_youtube_link(author, title)
             matches.append({'author':author, 'title':title,'sisalto':text, 'themes':themes, 'link':link})
 
     #If user searches for matches in the list of themes
@@ -186,12 +166,12 @@ def search():
             doc = list_of_songs[idx]
             title = re.sub('.*Title:.(.*).Lyrics.*', r'\1', doc[:100], flags=re.S)
             author = re.sub('(.*).Title.*', r'\1', doc[:100], flags=re.S)
-            text = re.sub(r'.*Lyrics:.(.*)', r'\1', doc, flags=re.S)
+            text = re.sub(r'.*Lyrics:.(.*)Youtube:.*', r'\1', doc, flags=re.S)
             text = text.replace('\n', '<br>')
+            link = re.sub(r'.*Lyrics:.*Youtube: (.*)', r'\1', doc, flags=re.S)
             themes = ""
             for themes_and_scores in list_of_themes[idx]:
                 themes += themes_and_scores[0] + " "
-            link = get_youtube_link(author, title)
             matches.append({'author':author, 'title':title,'sisalto':text, 'themes':themes, 'link':link})
 
 
